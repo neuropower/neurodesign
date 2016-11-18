@@ -7,7 +7,7 @@ from numpy import transpose as t
 from scipy.special import gamma
 from collections import Counter
 import pandas as pd
-from neurodesign import msequence,generate
+from neurodesign import msequence,generate, report
 import itertools
 import scipy.linalg
 import json
@@ -977,6 +977,7 @@ class population(object):
         return self
 
     def download(self):
+
         # select designs: best from k-means clusters
         shape = self.bestdesign.Xconv.shape
         xdim = np.zeros(np.product(shape))
@@ -1003,10 +1004,12 @@ class population(object):
         else:
             os.mkdir(self.folder)
 
+        report.make_report(self,os.path.join(self.folder,"report.pdf"))
 
         files=[]
 
         for des in range(self.outdes):
+
 
             os.mkdir(os.path.join(self.folder,"design_"+str(des)))
 

@@ -1,1 +1,3 @@
-autodoc_mock_imports = ['numpy', 'matplotlib','pandas', 'matplotlib.pyplot', 'matplotlib.patches', 'matplotlib.path', 'matplotlib.lines', 'matplotlib.text', 'matplotlib.transforms', 'matplotlib.artist', 'cpickle']
+extensions.remove('matplotlib.sphinxext.only_directives')
+extensions.remove('matplotlib.sphinxext.mathmpl')
+extensions.remove('matplotlib.sphinxext.plot_directive')

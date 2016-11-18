@@ -1,0 +1,37 @@
+from setuptools import setup
+
+setup(name='neurodesign',
+      version='0.0.1',
+      description='Package for design optimisation for fMRI experiments',
+      url='',
+      author='Joke Durnez',
+      author_email='joke.durnez@gmail.com',
+      license='MIT',
+      packages=['neurodesign'],
+      package_dir={'neurodesign':'src'},
+      package_data={'neurodesign':['media/NeuroDes.png']},
+      install_required=[
+      "numpy",
+      "scipy",
+      "collections",
+      "pandas",
+      "itertools",
+      "json",
+      "os",
+      "sys",
+      "zipfile",
+      "StringIO",
+      "shutil",
+      "copy",
+      "progressbar",
+      "sklearn",
+      "math",
+      "pickle",
+      "time",
+      "matplotlib",
+      "reportlab",
+      "cStringIO",
+      "seaborn",
+      "pdfrw"
+      ]
+      zip_safe=False)

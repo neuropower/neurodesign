@@ -1004,7 +1004,8 @@ class population(object):
         else:
             os.mkdir(self.folder)
 
-        report.make_report(self,os.path.join(self.folder,"report.pdf"))
+        reportfile = "report.pdf"
+        report.make_report(self,os.path.join(self.folder,reportfile))
 
         files=[]
 
@@ -1037,6 +1038,7 @@ class population(object):
             f.close()
 
             files.append(itifile)
+        files.append(reportfile)
 
         # zip up
         zip_subdir = "OptimalDesign"

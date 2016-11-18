@@ -40,6 +40,7 @@ POP = geneticalgorithm.population(
 #########################
 
 POP.naturalselection(seed=1)
+POP.download()
 
 ################
 # step by step #

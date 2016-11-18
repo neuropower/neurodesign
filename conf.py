@@ -1,5 +1,1 @@
-import mock
-
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate']
-for mod_name in MOCK_MODULES:
-sys.modules[mod_name] = mock.Mock()
+autodoc_mock_imports = ['numpy', 'matplotlib','pandas', 'matplotlib.pyplot', 'matplotlib.patches', 'matplotlib.path', 'matplotlib.lines', 'matplotlib.text', 'matplotlib.transforms', 'matplotlib.artist', 'cpickle']

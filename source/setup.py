@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='neurodesign',
-      version='0.0.1',
+      version='0.0.2',
       description='Package for design optimisation for fMRI experiments',
       url='',
       author='Joke Durnez',
@@ -33,5 +33,5 @@ setup(name='neurodesign',
       "cStringIO",
       "seaborn",
       "pdfrw"
-      ]
+      ],
       zip_safe=False)

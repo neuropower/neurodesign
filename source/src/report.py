@@ -133,7 +133,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
         [],
         [],
         [],
-        ["Contrasts:",Table(POP.exp.C,rowHeights=13)],
+        ["Contrasts:",Table(list(POP.exp.C),rowHeights=13)],
         [],
         ["ITI model:",POP.exp.ITImodel],
         ["minimum ITI:",POP.exp.ITImin],

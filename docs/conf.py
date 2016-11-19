@@ -15,6 +15,19 @@
 import sys
 import os
 
+import sys
+from mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+MOCK_MODULES = ['pygtk', 'gtk', 'gobject', 'argparse', 'numpy', 'pandas','matplotlib']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
+Contact GitHub API Training Shop Blog About
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.

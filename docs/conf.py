@@ -1,5 +1,5 @@
 import sys
-from unittest.mock import MagicMock
+from mock import MagicMock
 
 class Mock(MagicMock):
     @classmethod

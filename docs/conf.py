@@ -1,5 +1,10 @@
-import mock
+import sys
+from unittest.mock import MagicMock
 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate','matplotlib.sphinxext.mathmpl']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+            return Mock()
+
+MOCK_MODULES = ['pygtk', 'gtk', 'gobject', 'argparse', 'numpy', 'pandas','matplotlib']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)

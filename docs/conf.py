@@ -1,3 +1,5 @@
-extensions.remove('matplotlib.sphinxext.only_directives')
-extensions.remove('matplotlib.sphinxext.mathmpl')
-extensions.remove('matplotlib.sphinxext.plot_directive')
+import mock
+
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate','matplotlib.sphinxext.mathmpl']
+for mod_name in MOCK_MODULES:
+sys.modules[mod_name] = mock.Mock()

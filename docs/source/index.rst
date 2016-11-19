@@ -1,9 +1,7 @@
-.. neurodesign documentation master file, created by Joke Durnez
+.. _contents:
 
 Welcome to neurodesign's documentation!
 =======================================
-
-Contents:
 
 .. toctree::
    :maxdepth: 2

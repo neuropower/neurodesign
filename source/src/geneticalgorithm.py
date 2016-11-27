@@ -360,7 +360,6 @@ class experiment(object):
         self.ITImin = ITImin
         self.ITImean = ITImean
         self.ITImax = ITImax
-        self.ITIlam = None
 
         self.restnum = restnum
         self.restdur = restdur
@@ -369,13 +368,6 @@ class experiment(object):
         self.FdMax = FdMax
         self.FcMax = FcMax
         self.FfMax = FfMax
-
-        self.laghrf = None
-        self.basishrf = None
-        self.n_tp = None
-        self.n_scans = None
-        self.r_tp = None
-        self.r_scans = None
 
         self.countstim()
         self.CreateTsComp()
@@ -566,6 +558,17 @@ class population(object):
         self.write_score = os.path.join(self.folder,"metrics.json")
         self.write_design = os.path.join(self.folder,"design.json")
 
+    def change_seed(self):
+        '''
+        Function to change the seed.
+        '''
+        if self.seed<4*10**9:
+            self.seed = self.seed+1000
+        else:
+            self.seed = 1
+
+        return self
+
     def max_eff(self):
         '''
         Function to compute maximum efficiency for Confounding and Frequency efficiency.
@@ -621,7 +624,7 @@ class population(object):
         return design
 
 
-    def add_new_designs(self,weights=None,R=None,seed=123):
+    def add_new_designs(self,weights=None,R=None):
         '''
         This function generates the population.
 
@@ -645,13 +648,14 @@ class population(object):
             R[2] = 0
 
         NDes = 0
-        seed = 1000+seed
+        self.change_seed()
+
         while NDes < np.sum(R):
-            seed = seed+100
+            self.change_seed()
             ind = np.sum(NDes>np.cumsum(R))
             ordertype = ['blocked','random','msequence'][ind]
 
-            order = generate.order(self.exp.n_stimuli,self.exp.n_trials,self.exp.P,ordertype=ordertype,seed=seed)
+            order = generate.order(self.exp.n_stimuli,self.exp.n_trials,self.exp.P,ordertype=ordertype,seed=self.seed)
             ITI,ITIlam = generate.iti(ntrials = self.exp.n_trials,model=self.exp.ITImodel,min=self.exp.ITImin,max=self.exp.ITImax,mean=self.exp.ITImean,lam=self.exp.ITIlam,seed=seed)
             if ITIlam:
                 self.exp.ITIlam = ITIlam
@@ -693,7 +697,7 @@ class population(object):
                 self.designs = [des for ind,des in enumerate(self.designs) if not ind in remove]
                 rm = rm+len(remove)
 
-        self.add_new_designs(R=[0,rm,0],weights=weights,seed=seed)
+        self.add_new_designs(R=[0,rm,0],weights=weights)
 
         # Mutation:
         # if: Best design: stay untouched
@@ -805,7 +809,7 @@ class population(object):
                 json.dump(Seq,out2file)
 
 
-    def naturalselection(self,seed=100):
+    def naturalselection(self):
         '''
         Function to run natural selection for design optimization
 
@@ -813,7 +817,7 @@ class population(object):
         :type seed: integer or None
         '''
         if not seed:
-            seed=self.seed
+            self.change_seed()
 
         if (self.exp.FcMax == 1 and self.exp.FfMax==1):
             self.max_eff()
@@ -823,7 +827,6 @@ class population(object):
             text_file.write("Fe")
             text_file.close()
             # set seed
-            seed = seed+100
             # initiate progressbar
             bar = progressbar.ProgressBar(maxval=self.preruncycles, widgets=[progressbar.Bar('=', 'Estimation efficiency prerun [', ']'), ' ', progressbar.Percentage()])
             bar.start()
@@ -833,12 +836,12 @@ class population(object):
             self.finished = False
             Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
             # add new designs
-            self.add_new_designs(seed=seed,weights=[1,0,0,0])
+            self.add_new_designs(seed=self.seed,weights=[1,0,0,0])
             # loop
             for generation in range(self.preruncycles):
                 bar.update(generation+1)
-                seed = seed+1000
-                self.to_next_generation(seed=seed,weights=[1,0,0,0])
+                self.change_seed()
+                self.to_next_generation(seed=self.seed,weights=[1,0,0,0])
                 self.write_best(generation,Out)
                 if self.finished:
                     continue
@@ -850,7 +853,6 @@ class population(object):
             text_file.write("Fd")
             text_file.close()
             # set seed
-            seed = seed+300
             # initiate progressbar
             bar = progressbar.ProgressBar(maxval=self.preruncycles, widgets=[progressbar.Bar('=', 'Detection power prerun [', ']'), ' ', progressbar.Percentage()])
             bar.start()
@@ -860,23 +862,23 @@ class population(object):
             self.finished = False
             Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
             # add new designs
-            self.add_new_designs(seed=seed,weights=[1,0,0,0])
+            self.change_seed()
+            self.add_new_designs(seed=self.seed,weights=[1,0,0,0])
             # loop
             for generation in range(self.preruncycles):
                 bar.update(generation+1)
-                seed = seed+1000
-                self.to_next_generation(seed=seed,weights=[0,1,0,0])
+                self.change_seed()
+                self.to_next_generation(seed=self.seed,weights=[0,1,0,0])
                 self.write_best(generation,Out)
                 if self.finished:
                     continue
             bar.finish()
             self.exp.FdMax = np.max(self.bestdesign.F)
 
-        # set seed
+        # initiate statusfile
         text_file = open(self.statusfile,'w')
         text_file.write("optimalisation")
         text_file.close()
-        seed = seed+300
         # initiate progressbar
         bar = progressbar.ProgressBar(maxval=self.cycles, widgets=[progressbar.Bar('=', 'Optimalisation prerun [', ']'), ' ', progressbar.Percentage()])
         bar.start()
@@ -885,7 +887,8 @@ class population(object):
         self.optima = []
         self.finished = False
         # add new designs
-        self.add_new_designs(seed=seed)
+        self.change_seed()
+        self.add_new_designs(seed=self.seed)
         Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
         # append best design but reset efficiency measures
         if self.bestdesign:
@@ -897,8 +900,8 @@ class population(object):
         # loop
         for generation in range(self.cycles):
             bar.update(generation+1)
-            seed = seed+1000
-            self.to_next_generation(seed=seed)
+            self.change_seed()
+            self.to_next_generation(seed=self.seed)
             self.write_best(generation,Out)
             if self.finished:
                 continue

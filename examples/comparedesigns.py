@@ -5,26 +5,22 @@ import numpy as np
 
 EXP = geneticalgorithm.experiment(
     TR=2,
-    n_trials=21,
-    P = [0.33,0.33,0.33],
+    n_trials=20,
+    P = [0.3,0.3,0.4],
     C = [[1,-1,0],[0,1,-1]],
     n_stimuli = 3,
     rho = 0.3,
-    resolution=0.5,
     stim_duration=1,
-    restnum=20,
-    restdur=20,
     ITImodel = "uniform",
     ITImin = 2,
-    ITImax=4,
-    hardprob=False
+    ITImax=4
     )
 
 # define first design with a fixed ITI
 
 DES = geneticalgorithm.design(
-    order = [0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1,2],
-    ITI = [2]*21,
+    order = [0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1],
+    ITI = [2]*20,
     experiment=EXP
 )
 
@@ -39,8 +35,8 @@ DES.FfCalc()
 # define second design
 
 DES2 = geneticalgorithm.design(
-    order = [0,0,1,1,2,2,0,0,1,1,2,2,0,0,1,1,2,2,0,1,2],
-    ITI = generate.iti(21,"exponential",min=1,mean=2,max=4,seed=1234)[0],
+    order = [0,0,1,1,2,2,0,0,1,1,2,2,0,0,1,1,2,2,0,1],
+    ITI = generate.iti(20,"exponential",min=1,mean=2,max=4,seed=1234)[0],
     experiment=EXP)
 
 DES2.designmatrix(); DES2.FeCalc(); DES2.FdCalc(); DES2.FcCalc(); DES2.FfCalc()

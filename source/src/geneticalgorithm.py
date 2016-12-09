@@ -33,28 +33,13 @@ class design(object):
     :type experiment: experiment object
     :param onsets: The onsets of all stimuli.
     :type onsets: list of floats
-    :param Fe: The estimation efficiency.
-    :type Fe: float
-    :param Fd: The detection power.
-    :type Fd: float
-    :param Fc: The efficiency in terms of confounding.
-    :type Fc: float
-    :param Ff: The efficiency in terms of frequencies.
-    :type Ff: float
-    :param F: The weighted efficiency.
-    :type F: float
     '''
 
-    def __init__(self,order,ITI,experiment,onsets=None,Fe=0,Fd=0,Fc=0,Ff=0,F=0):
+    def __init__(self,order,ITI,experiment,onsets=None):
 
         self.order = order
         self.ITI = ITI
         self.onsets = onsets
-        self.Fe = Fe
-        self.Fd = Fd
-        self.Fc = Fc
-        self.Ff = Ff
-        self.F = F
 
         self.experiment = experiment
 
@@ -162,7 +147,7 @@ class design(object):
         else:
             ITIli = np.array(self.ITI)+self.experiment.trial_duration
             self.onsets = np.cumsum(ITIli)-ITIli[0]
-        stimonsets = [x + self.experiment.t_prestim for x in self.onsets]
+        stimonsets = [x + self.experiment.t_pre for x in self.onsets]
 
         # round onsets to resolution
         self.ITI = [np.floor(x/self.experiment.resolution)*self.experiment.resolution for x in self.ITI]
@@ -290,6 +275,10 @@ class design(object):
         :param weights: Weights given to each of the efficiency metrics in this order: Estimation, Detection, Frequencies, Confounders.
         :type weights: list of floats
         '''
+        self.FeCalc()
+        self.FdCalc()
+        self.FfCalc()
+        self.FcCalc()
         matr = np.array([self.Fe,self.Fd,self.Ff,self.Fc])
         self.F = np.sum(weights*matr)
         return self
@@ -317,14 +306,16 @@ class experiment(object):
     :type resolution: float
     :param stim_duration: duration (seconds) of stimulus
     :type stim_duration: float
-    :param t_prestim: duration (seconds) of trial part before stimulus presentation (eg. fixation cross)
-    :type t_prestim: float
-    :param t_poststim: duration (seconds) of trial part after stimulus presentation
-    :type t_poststim: float
+    :param t_pre: duration (seconds) of trial part before stimulus presentation (eg. fixation cross)
+    :type t_pre: float
+    :param t_post: duration (seconds) of trial part after stimulus presentation
+    :type t_post: float
     :param maxrep: maximum number of repetitions
     :type maxrep: integer or None
     :param hardprob: can the probabilities differ from the nominal value?
     :type hardprob: boolean
+    :param confoundorder: The order to which confounding is controlled.
+    :type confoundorder: integer
     :param restnum: Number of trials between restblocks
     :type restnum: integer
     :param restdur: duration (seconds) of the rest blocks
@@ -340,14 +331,14 @@ class experiment(object):
 
     '''
 
-    def __init__(self,TR,P,C,rho,stim_duration,n_stimuli,ITImodel=None,ITImin=None,ITImax=None,ITImean=None,restnum=0,restdur=0,t_prestim=0,t_poststim=0,n_trials=None,duration=None,resolution=0.1,FeMax=1,FdMax=1,FcMax=1,FfMax=1,maxrep=None,hardprob=False):
+    def __init__(self,TR,P,C,rho,stim_duration,n_stimuli,ITImodel=None,ITImin=None,ITImax=None,ITImean=None,restnum=0,restdur=0,t_pre=0,t_post=0,n_trials=None,duration=None,resolution=0.1,FeMax=1,FdMax=1,FcMax=1,FfMax=1,maxrep=None,hardprob=False,confoundorder=3):
         self.TR = TR
         self.P = P
         self.C = C
         self.rho = rho
         self.n_stimuli = n_stimuli
-        self.t_prestim = t_prestim
-        self.t_poststim = t_poststim
+        self.t_pre = t_pre
+        self.t_post = t_post
         self.n_trials = n_trials
         self.duration = duration
         self.resolution = resolution
@@ -355,11 +346,13 @@ class experiment(object):
 
         self.maxrep = maxrep
         self.hardprob = hardprob
+        self.confoundorder = confoundorder
 
         self.ITImodel = ITImodel
         self.ITImin = ITImin
         self.ITImean = ITImean
         self.ITImax = ITImax
+        self.ITIlam = None
 
         self.restnum = restnum
         self.restdur = restdur
@@ -372,12 +365,31 @@ class experiment(object):
         self.countstim()
         self.CreateTsComp()
         self.CreateLmComp()
+        self.max_eff()
+
+    def max_eff(self):
+        '''
+        Function to compute maximum efficiency for Confounding and Frequency efficiency.
+        '''
+        NulDesign = design(
+            order = [np.argmin(self.P)]*self.n_trials,
+            ITI = [self.ITImean]*self.n_trials,
+            experiment = self
+        )
+        NulDesign.designmatrix()
+        NulDesign.FcCalc(self.confoundorder)
+        self.FcMax = 1-NulDesign.Fc
+        NulDesign.FfCalc()
+        self.FfMax = 1-NulDesign.Ff
+
+        return self
+
 
     def countstim(self):
         '''
         Function to compute some arguments depending on other arguments.
         '''
-        self.trial_duration = self.stim_duration + self.t_prestim + self.t_poststim
+        self.trial_duration = self.stim_duration + self.t_pre + self.t_post
 
         if self.ITImodel == "uniform":
             self.ITImean = (self.ITImax+self.ITImin)/2
@@ -495,8 +507,6 @@ class population(object):
 
     :param experiment: The experimental setup of the fMRI experiment.
     :type experiment: experiment
-    :param confoundorder: The order to which confounding is controlled.
-    :type confoundorder: integer
     :param G: The size of the generation
     :type G: integer
     :param R: with which rate are the orders generated from ['blocked','random','mseq']
@@ -529,10 +539,9 @@ class population(object):
     :type outdes: integer
     '''
 
-    def __init__(self,experiment,confoundorder,G,R,q,weights,I,preruncycles,cycles,Aoptimality=True,seed=None,write_score = None,write_design = None,folder=None,statusfile=None,outdes = 3,convergence=1000):
+    def __init__(self,experiment,weights,preruncycles,cycles,seed=None,I=4,G=20,R=[0.4,0.4,0.2],q=0.01,Aoptimality=True,write_score = None,write_design = None,folder=None,statusfile=None,outdes = 3,convergence=1000):
 
         self.exp = experiment
-        self.confoundorder=confoundorder
         self.G = G
         self.R = R
         self.q = q
@@ -554,9 +563,14 @@ class population(object):
         self.optima = []
         self.bestdesign = None
 
-        self.statusfile = os.path.join(self.folder,"status.txt")
-        self.write_score = os.path.join(self.folder,"metrics.json")
-        self.write_design = os.path.join(self.folder,"design.json")
+        if self.folder:
+            self.statusfile = os.path.join(self.folder,"status.txt")
+            self.write_score = os.path.join(self.folder,"metrics.json")
+            self.write_design = os.path.join(self.folder,"design.json")
+        else:
+            self.statusfile = None
+            self.write_score = None
+            self.write_design = None
 
     def change_seed(self):
         '''
@@ -566,23 +580,6 @@ class population(object):
             self.seed = self.seed+1000
         else:
             self.seed = 1
-
-        return self
-
-    def max_eff(self):
-        '''
-        Function to compute maximum efficiency for Confounding and Frequency efficiency.
-        '''
-        NulDesign = design(
-            order = [np.argmin(self.exp.P)]*self.exp.n_trials,
-            ITI = [self.exp.ITImean]*self.exp.n_trials,
-            experiment = self.exp
-        )
-        NulDesign.designmatrix()
-        NulDesign.FcCalc(self.confoundorder)
-        self.exp.FcMax = 1-NulDesign.Fc
-        NulDesign.FfCalc()
-        self.exp.FfMax = 1-NulDesign.Ff
 
         return self
 
@@ -616,7 +613,7 @@ class population(object):
             design.FeCalc(Aoptimality = self.Aoptimality)
         if weights[1]>0:
             design.FdCalc(Aoptimality = self.Aoptimality)
-        design.FcCalc(self.confoundorder)
+        design.FcCalc(self.exp.confoundorder)
         design.FfCalc()
 
         design.FCalc(weights)
@@ -656,7 +653,7 @@ class population(object):
             ordertype = ['blocked','random','msequence'][ind]
 
             order = generate.order(self.exp.n_stimuli,self.exp.n_trials,self.exp.P,ordertype=ordertype,seed=self.seed)
-            ITI,ITIlam = generate.iti(ntrials = self.exp.n_trials,model=self.exp.ITImodel,min=self.exp.ITImin,max=self.exp.ITImax,mean=self.exp.ITImean,lam=self.exp.ITIlam,seed=seed)
+            ITI,ITIlam = generate.iti(ntrials = self.exp.n_trials,model=self.exp.ITImodel,min=self.exp.ITImin,max=self.exp.ITImax,mean=self.exp.ITImean,lam=self.exp.ITIlam,seed=self.seed)
             if ITIlam:
                 self.exp.ITIlam = ITIlam
             des = design(order=order,ITI=ITI,experiment=self.exp)
@@ -763,7 +760,7 @@ class population(object):
         # immigration
         noim = self.I
         R = np.ceil(np.array(self.R)*noim).tolist()
-        self.add_new_designs(R=R,weights=weights,seed=seed)
+        self.add_new_designs(R=R,weights=weights)
 
         # inspect efficiencies
         efficiencies = [x.F for x in self.designs]
@@ -816,16 +813,16 @@ class population(object):
         :param seed: The seed for random processes.
         :type seed: integer or None
         '''
-        if not seed:
-            self.change_seed()
+        self.change_seed()
 
         if (self.exp.FcMax == 1 and self.exp.FfMax==1):
             self.max_eff()
 
         if self.weights[0] > 0:
-            text_file = open(self.statusfile,'w')
-            text_file.write("Fe")
-            text_file.close()
+            if self.statusfile:
+                text_file = open(self.statusfile,'w')
+                text_file.write("Fe")
+                text_file.close()
             # set seed
             # initiate progressbar
             bar = progressbar.ProgressBar(maxval=self.preruncycles, widgets=[progressbar.Bar('=', 'Estimation efficiency prerun [', ']'), ' ', progressbar.Percentage()])
@@ -836,7 +833,7 @@ class population(object):
             self.finished = False
             Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
             # add new designs
-            self.add_new_designs(seed=self.seed,weights=[1,0,0,0])
+            self.add_new_designs(weights=[1,0,0,0])
             # loop
             for generation in range(self.preruncycles):
                 bar.update(generation+1)
@@ -849,9 +846,10 @@ class population(object):
             self.exp.FeMax = np.max(self.bestdesign.F)
 
         if self.weights[1] > 0:
-            text_file = open(self.statusfile,'w')
-            text_file.write("Fd")
-            text_file.close()
+            if self.statusfile:
+                text_file = open(self.statusfile,'w')
+                text_file.write("Fd")
+                text_file.close()
             # set seed
             # initiate progressbar
             bar = progressbar.ProgressBar(maxval=self.preruncycles, widgets=[progressbar.Bar('=', 'Detection power prerun [', ']'), ' ', progressbar.Percentage()])
@@ -863,7 +861,7 @@ class population(object):
             Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
             # add new designs
             self.change_seed()
-            self.add_new_designs(seed=self.seed,weights=[1,0,0,0])
+            self.add_new_designs(weights=[1,0,0,0])
             # loop
             for generation in range(self.preruncycles):
                 bar.update(generation+1)
@@ -876,9 +874,10 @@ class population(object):
             self.exp.FdMax = np.max(self.bestdesign.F)
 
         # initiate statusfile
-        text_file = open(self.statusfile,'w')
-        text_file.write("optimalisation")
-        text_file.close()
+        if self.statusfile:
+            text_file = open(self.statusfile,'w')
+            text_file.write("optimalisation")
+            text_file.close()
         # initiate progressbar
         bar = progressbar.ProgressBar(maxval=self.cycles, widgets=[progressbar.Bar('=', 'Optimalisation prerun [', ']'), ' ', progressbar.Percentage()])
         bar.start()
@@ -888,7 +887,7 @@ class population(object):
         self.finished = False
         # add new designs
         self.change_seed()
-        self.add_new_designs(seed=self.seed)
+        self.add_new_designs()
         Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
         # append best design but reset efficiency measures
         if self.bestdesign:
@@ -907,7 +906,8 @@ class population(object):
                 continue
         bar.finish()
 
-        os.remove(self.statusfile)
+        if self.statusfile:
+            os.remove(self.statusfile)
 
         return self
 
@@ -922,16 +922,17 @@ class population(object):
         "    duration = {6}, \n" \
         "    resolution = {7}, \n" \
         "    stim_duration = {8}, \n" \
-        "    t_prestim = {9}, \n" \
-        "    t_poststim = {10}, \n" \
+        "    t_pre = {9}, \n" \
+        "    t_post = {10}, \n" \
         "    maxrep = {10}, \n" \
         "    hardprob = {11}, \n" \
-        "    ITImodel = '{12}', \n" \
-        "    ITImin = {13}, \n" \
-        "    ITImean = {14}, \n" \
-        "    ITImax = {15}, \n" \
-        "    restnum = {16}, \n" \
-        "    restdur = {17}) \n".format(
+        "    confoundorder = {12}, \n" \
+        "    ITImodel = '{13}', \n" \
+        "    ITImin = {14}, \n" \
+        "    ITImean = {15}, \n" \
+        "    ITImax = {16}, \n" \
+        "    restnum = {17}, \n" \
+        "    restdur = {18}) \n".format(
         self.exp.TR,
         self.exp.P.tolist(),
         self.exp.C.tolist(),
@@ -941,10 +942,11 @@ class population(object):
         self.exp.duration,
         self.exp.resolution,
         self.exp.stim_duration,
-        self.exp.t_prestim,
-        self.exp.t_poststim,
+        self.exp.t_pre,
+        self.exp.t_post,
         self.exp.maxrep,
         self.exp.hardprob,
+        self.exp.confoundorder,
         self.exp.ITImodel,
         self.exp.ITImin,
         self.exp.ITImean,
@@ -954,17 +956,15 @@ class population(object):
 
         cm2 = "POP = geneticalgorithm.population( \n" \
         "    experiment = EXP, \n" \
-        "    confoundorder = {0}, \n" \
-        "    G = {1}, \n" \
-        "    R = {2}, \n" \
-        "    q = {3}, \n" \
-        "    weights = {4}, \n" \
-        "    I = {5}, \n" \
-        "    preruncycles = {6}, \n" \
-        "    cycles = {7}, \n" \
-        "    convergence = {8}, \n" \
-        "    folder = '{9}') \n".format(
-        self.confoundorder,
+        "    G = {0}, \n" \
+        "    R = {1}, \n" \
+        "    q = {2}, \n" \
+        "    weights = {3}, \n" \
+        "    I = {4}, \n" \
+        "    preruncycles = {5}, \n" \
+        "    cycles = {6}, \n" \
+        "    convergence = {7}, \n" \
+        "    folder = '{8}') \n".format(
         self.G,
         self.R,
         self.q,
@@ -1013,7 +1013,6 @@ class population(object):
         files=[]
 
         for des in range(self.outdes):
-
 
             os.mkdir(os.path.join(self.folder,"design_"+str(des)))
 

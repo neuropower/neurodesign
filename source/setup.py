@@ -1,9 +1,8 @@
 from setuptools import setup
 
 setup(name='neurodesign',
-      version='0.0.6',
+      version='0.0.7',
       description='Package for design optimisation for fMRI experiments',
-      url='',
       author='Joke Durnez',
       author_email='joke.durnez@gmail.com',
       license='MIT',

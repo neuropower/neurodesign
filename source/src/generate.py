@@ -63,6 +63,7 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
     :returns iti: A list with the created ITI's
     '''
 
+    lam = None
     if model == "fixed":
         smp = [mean]*ntrials
 

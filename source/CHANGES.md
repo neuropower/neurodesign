@@ -1,3 +1,12 @@
+0.0.10 - 01/10/2017
+* remove direct support for GUI
+
+0.0.9 - 12/19/2016
+* change matplotlib backend for report
+
+0.0.8 - 12/19/2016
+* debug script
+
 0.0.7 - 12/09/2016
 * debug seeds
 * restructure a few parameters in other classes

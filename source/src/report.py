@@ -5,6 +5,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
 import sklearn.cluster
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import cStringIO
 import StringIO
@@ -17,7 +19,6 @@ from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
 import neurodesign
 import os
-
 
 def make_report(POP,outfile="NeuroDesign.pdf"):
     styles=getSampleStyleSheet()

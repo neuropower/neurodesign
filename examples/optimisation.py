@@ -22,9 +22,10 @@ EXP = geneticalgorithm.experiment(
 POP = geneticalgorithm.population(
     experiment=EXP,
     weights=[0,0.5,0.25,0.25],
-    preruncycles = 100,
-    cycles = 100,
-    seed=1
+    preruncycles = 10,
+    cycles = 10,
+    seed=1,
+    folder='/Users/Joke/Documents/Onderzoek/ProjectsOngoing/Neuropower/playground/design'
     )
 
 #########################
@@ -33,6 +34,7 @@ POP = geneticalgorithm.population(
 
 POP.naturalselection()
 POP.download()
+POP.print_cmd()
 
 ################
 # step by step #

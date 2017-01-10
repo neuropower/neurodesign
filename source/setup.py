@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='neurodesign',
-      version='0.0.7',
+      version='0.0.10',
       description='Package for design optimisation for fMRI experiments',
       author='Joke Durnez',
       author_email='joke.durnez@gmail.com',
@@ -22,7 +22,6 @@ setup(name='neurodesign',
       "StringIO",
       "shutil",
       "copy",
-      "progressbar",
       "sklearn",
       "math",
       "pickle",

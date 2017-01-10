@@ -18,7 +18,6 @@ import zipfile
 import StringIO
 import shutil
 import copy
-import progressbar
 import sklearn.cluster
 
 class design(object):
@@ -527,19 +526,13 @@ class population(object):
     :type Aoptimality: boolean
     :param convergence: after how many stable iterations is there convergence
     :type convergence: integer
-    :param write_score: file to write efficiency metrics during optimisation
-    :type write_score: string
-    :param write_design: file to write optimal design during optimisation
-    :type write_design: string
-    :param statusfile: file to write status
-    :type statusfile: string
     :param folder: folder to save output
     :type folder: string
     :param outdes: number of designs to be saved
     :type outdes: integer
     '''
 
-    def __init__(self,experiment,weights,preruncycles,cycles,seed=None,I=4,G=20,R=[0.4,0.4,0.2],q=0.01,Aoptimality=True,write_score = None,write_design = None,folder=None,statusfile=None,outdes = 3,convergence=1000):
+    def __init__(self,experiment,weights,preruncycles,cycles,seed=None,I=4,G=20,R=[0.4,0.4,0.2],q=0.01,Aoptimality=True,folder=None,outdes = 3,convergence=1000):
 
         self.exp = experiment
         self.G = G
@@ -551,7 +544,6 @@ class population(object):
         self.cycles = cycles
         self.convergence = convergence
         self.Aoptimality = Aoptimality
-        self.statusfile = statusfile
         self.outdes = outdes
         self.folder = folder
         if seed:
@@ -562,15 +554,6 @@ class population(object):
         self.designs = []
         self.optima = []
         self.bestdesign = None
-
-        if self.folder:
-            self.statusfile = os.path.join(self.folder,"status.txt")
-            self.write_score = os.path.join(self.folder,"metrics.json")
-            self.write_design = os.path.join(self.folder,"design.json")
-        else:
-            self.statusfile = None
-            self.write_score = None
-            self.write_design = None
 
     def change_seed(self):
         '''
@@ -784,130 +767,62 @@ class population(object):
 
         return self
 
-    def write_best(self,generation,Out):
-        if self.write_score:
-            opt = [self.bestdesign.F,self.bestdesign.Fe,self.bestdesign.Ff,self.bestdesign.Fc,self.bestdesign.Fd]
-            k = 0
-            for key in ['FBest','FeBest','FfBest','FcBest','FdBest']:
-                Out[key].append(opt[k])
-                k = k+1
-            Out['Gen'].append(generation)
-            with open(self.write_score,'w') as fp:
-                json.dump(Out,fp)
-        if self.write_design:
-            keys = ["Stimulus_"+str(i) for i in range(self.exp.n_stimuli)]
-            Seq = {}
-            for s in keys:
-                Seq.update({s:[]})
-            for stim in range(self.exp.n_stimuli):
-                Seq["Stimulus_"+str(stim)]=self.bestdesign.Xconv[:,stim].tolist()
-            Seq.update({"tps":self.bestdesign.experiment.r_tp.tolist()})
-            with open(self.write_design,'w') as out2file:
-                json.dump(Seq,out2file)
 
-
-    def naturalselection(self):
+    def clear(self):
         '''
-        Function to run natural selection for design optimization
-
-        :param seed: The seed for random processes.
-        :type seed: integer or None
+        Function to clear results between optimalisations (maximum Fe, Fd or opt)
         '''
-        self.change_seed()
-
-        if (self.exp.FcMax == 1 and self.exp.FfMax==1):
-            self.max_eff()
-
-        if self.weights[0] > 0:
-            if self.statusfile:
-                text_file = open(self.statusfile,'w')
-                text_file.write("Fe")
-                text_file.close()
-            # set seed
-            # initiate progressbar
-            bar = progressbar.ProgressBar(maxval=self.preruncycles, widgets=[progressbar.Bar('=', 'Estimation efficiency prerun [', ']'), ' ', progressbar.Percentage()])
-            bar.start()
-            # clear all attributes
-            self.designs = []
-            self.optima = []
-            self.finished = False
-            Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
-            # add new designs
-            self.add_new_designs(weights=[1,0,0,0])
-            # loop
-            for generation in range(self.preruncycles):
-                bar.update(generation+1)
-                self.change_seed()
-                self.to_next_generation(seed=self.seed,weights=[1,0,0,0])
-                self.write_best(generation,Out)
-                if self.finished:
-                    continue
-            bar.finish()
-            self.exp.FeMax = np.max(self.bestdesign.F)
-
-        if self.weights[1] > 0:
-            if self.statusfile:
-                text_file = open(self.statusfile,'w')
-                text_file.write("Fd")
-                text_file.close()
-            # set seed
-            # initiate progressbar
-            bar = progressbar.ProgressBar(maxval=self.preruncycles, widgets=[progressbar.Bar('=', 'Detection power prerun [', ']'), ' ', progressbar.Percentage()])
-            bar.start()
-            # clear all attributes
-            self.designs = []
-            self.optima = []
-            self.finished = False
-            Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
-            # add new designs
-            self.change_seed()
-            self.add_new_designs(weights=[1,0,0,0])
-            # loop
-            for generation in range(self.preruncycles):
-                bar.update(generation+1)
-                self.change_seed()
-                self.to_next_generation(seed=self.seed,weights=[0,1,0,0])
-                self.write_best(generation,Out)
-                if self.finished:
-                    continue
-            bar.finish()
-            self.exp.FdMax = np.max(self.bestdesign.F)
-
-        # initiate statusfile
-        if self.statusfile:
-            text_file = open(self.statusfile,'w')
-            text_file.write("optimalisation")
-            text_file.close()
-        # initiate progressbar
-        bar = progressbar.ProgressBar(maxval=self.cycles, widgets=[progressbar.Bar('=', 'Optimalisation prerun [', ']'), ' ', progressbar.Percentage()])
-        bar.start()
-        # clear all attributes
         self.designs = []
         self.optima = []
         self.finished = False
-        # add new designs
         self.change_seed()
-        self.add_new_designs()
-        Out = {"FBest": [], 'FeBest': [], 'FfBest': [],'FcBest': [], 'FdBest': [], 'Gen': []}
-        # append best design but reset efficiency measures
+
         if self.bestdesign:
             bestdes = design(order=self.bestdesign.order,ITI=self.bestdesign.ITI,experiment=self.exp)
             bestdes = self.check_develop(bestdes)
             if not bestdes == False:
                 self.designs.append(bestdes)
             self.bestdesign = None
+
+        return self
+
+    def naturalselection(self):
+        '''
+        Function to run natural selection for design optimization
+        '''
+
+        if (self.exp.FcMax == 1 and self.exp.FfMax==1):
+            self.max_eff()
+
+        if self.weights[0] > 0:
+            # add new designs
+            self.clear()
+            self.add_new_designs(weights=[1,0,0,0])
+            # loop
+            for generation in range(self.preruncycles):
+                self.to_next_generation(seed=self.seed,weights=[1,0,0,0])
+                if self.finished:
+                    continue
+            self.exp.FeMax = np.max(self.bestdesign.F)
+
+        if self.weights[1] > 0:
+            self.clear()
+            self.add_new_designs(weights=[1,0,0,0])
+            # loop
+            for generation in range(self.preruncycles):
+                self.to_next_generation(seed=self.seed,weights=[0,1,0,0])
+                if self.finished:
+                    continue
+            self.exp.FdMax = np.max(self.bestdesign.F)
+
+        # clear all attributes
+        self.clear()
+        self.add_new_designs()
         # loop
         for generation in range(self.cycles):
-            bar.update(generation+1)
-            self.change_seed()
             self.to_next_generation(seed=self.seed)
-            self.write_best(generation,Out)
             if self.finished:
                 continue
-        bar.finish()
-
-        if self.statusfile:
-            os.remove(self.statusfile)
 
         return self
 
@@ -924,18 +839,18 @@ class population(object):
         "    stim_duration = {8}, \n" \
         "    t_pre = {9}, \n" \
         "    t_post = {10}, \n" \
-        "    maxrep = {10}, \n" \
-        "    hardprob = {11}, \n" \
-        "    confoundorder = {12}, \n" \
-        "    ITImodel = '{13}', \n" \
-        "    ITImin = {14}, \n" \
-        "    ITImean = {15}, \n" \
-        "    ITImax = {16}, \n" \
-        "    restnum = {17}, \n" \
-        "    restdur = {18}) \n".format(
+        "    maxrep = {11}, \n" \
+        "    hardprob = {12}, \n" \
+        "    confoundorder = {13}, \n" \
+        "    ITImodel = '{14}', \n" \
+        "    ITImin = {15}, \n" \
+        "    ITImean = {16}, \n" \
+        "    ITImax = {17}, \n" \
+        "    restnum = {18}, \n" \
+        "    restdur = {19}) \n".format(
         self.exp.TR,
-        self.exp.P.tolist(),
-        self.exp.C.tolist(),
+        self.exp.P if type(self.exp.P) == list else self.exp.P.tolist(),
+        self.exp.C if type(self.exp.C) == list else self.exp.C.tolist(),
         self.exp.rho,
         self.exp.n_stimuli,
         self.exp.n_trials,
@@ -944,7 +859,7 @@ class population(object):
         self.exp.stim_duration,
         self.exp.t_pre,
         self.exp.t_post,
-        self.exp.maxrep,
+        self.exp.maxrep if self.exp.maxrep else 'None',
         self.exp.hardprob,
         self.exp.confoundorder,
         self.exp.ITImodel,
@@ -964,15 +879,17 @@ class population(object):
         "    preruncycles = {5}, \n" \
         "    cycles = {6}, \n" \
         "    convergence = {7}, \n" \
-        "    folder = '{8}') \n".format(
+        "    seed = {8}, \n" \
+        "    folder = '{9}') \n".format(
         self.G,
         self.R,
         self.q,
-        self.weights.tolist(),
+        self.weights if type(self.weights) == list else self.weights.tolist(),
         self.I,
         self.preruncycles,
         self.cycles,
         self.convergence,
+        self.seed,
         "/local/")
 
         self.cmd = cm1+"\n\n"+cm2+"\n"
@@ -980,79 +897,82 @@ class population(object):
         return self
 
     def download(self):
-
-        # select designs: best from k-means clusters
-        shape = self.bestdesign.Xconv.shape
-        xdim = np.zeros(np.product(shape))
-        des = np.zeros([np.product(shape),len(self.designs)])
-        efficiencies = [x.F for x in self.designs]
-
-        for d in range(len(self.designs)):
-            hrf = []
-            for stim in range(shape[1]):
-                hrf=hrf+self.designs[d].Xconv[:,stim].tolist()
-            des[:,d]=hrf
-        clus = sklearn.cluster.k_means(des.T,self.outdes)
-        ids = []
-        for k in range(self.outdes):
-            efs = [eff for ind,eff in enumerate(efficiencies) if clus[1][ind]==k]
-            ids.append(np.where(efficiencies==np.max(efs))[0][0])
-
-        # empty folder
-        if os.path.exists(self.folder):
-            files = os.listdir(self.folder)
-            for f in files:
-                if 'design_' in f:
-                    shutil.rmtree(os.path.join(self.folder,f))
+        if not self.folder:
+            raise ValueError('No folder defined to download output.')
         else:
-            os.mkdir(self.folder)
 
-        reportfile = "report.pdf"
-        report.make_report(self,os.path.join(self.folder,reportfile))
+            # select designs: best from k-means clusters
+            shape = self.bestdesign.Xconv.shape
+            xdim = np.zeros(np.product(shape))
+            des = np.zeros([np.product(shape),len(self.designs)])
+            efficiencies = [x.F for x in self.designs]
 
-        files=[]
+            for d in range(len(self.designs)):
+                hrf = []
+                for stim in range(shape[1]):
+                    hrf=hrf+self.designs[d].Xconv[:,stim].tolist()
+                des[:,d]=hrf
+            clus = sklearn.cluster.k_means(des.T,self.outdes)
+            ids = []
+            for k in range(self.outdes):
+                efs = [eff for ind,eff in enumerate(efficiencies) if clus[1][ind]==k]
+                ids.append(np.where(efficiencies==np.max(efs))[0][0])
 
-        for des in range(self.outdes):
+            # empty folder
+            if os.path.exists(self.folder):
+                files = os.listdir(self.folder)
+                for f in files:
+                    if 'design_' in f:
+                        shutil.rmtree(os.path.join(self.folder,f))
+            else:
+                os.mkdir(self.folder)
 
-            os.mkdir(os.path.join(self.folder,"design_"+str(des)))
+            reportfile = "report.pdf"
+            report.make_report(self,os.path.join(self.folder,reportfile))
 
-            design = self.designs[ids[des]]
+            files=[]
 
-            for stim in range(self.exp.n_stimuli):
+            for des in range(self.outdes):
 
-                onsetsfile = os.path.join("design_"+str(des),"stimulus_"+str(stim)+".txt")
+                os.mkdir(os.path.join(self.folder,"design_"+str(des)))
 
-                onsubsets = [str(x) for x in np.array(design.onsets)[np.array(design.order)==stim]]
-                f = open(os.path.join(self.folder,onsetsfile),'w+')
-                for line in onsubsets:
-                    f.write(line)
+                design = self.designs[ids[des]]
+
+                for stim in range(self.exp.n_stimuli):
+
+                    onsetsfile = os.path.join("design_"+str(des),"stimulus_"+str(stim)+".txt")
+
+                    onsubsets = [str(x) for x in np.array(design.onsets)[np.array(design.order)==stim]]
+                    f = open(os.path.join(self.folder,onsetsfile),'w+')
+                    for line in onsubsets:
+                        f.write(line)
+                        f.write("\n")
+                    f.close()
+
+                    files.append(onsetsfile)
+
+                itifile = os.path.join("design_"+str(des),"ITIs.txt")
+
+                f = open(os.path.join(self.folder,itifile),'w+')
+                for line in design.ITI:
+                    f.write(str(line))
                     f.write("\n")
                 f.close()
 
-                files.append(onsetsfile)
+                files.append(itifile)
+            files.append(reportfile)
 
-            itifile = os.path.join("design_"+str(des),"ITIs.txt")
+            # zip up
+            zip_subdir = "OptimalDesign"
+            self.zip_filename = "%s.zip" % zip_subdir
+            self.file = StringIO.StringIO()
+            zf = zipfile.ZipFile(self.file,"w")
 
-            f = open(os.path.join(self.folder,itifile),'w+')
-            for line in design.ITI:
-                f.write(str(line))
-                f.write("\n")
-            f.close()
+            for fpath in files:
+                zf.write(os.path.join(self.folder,fpath),os.path.join(zip_subdir,fpath))
+            zf.close()
 
-            files.append(itifile)
-        files.append(reportfile)
-
-        # zip up
-        zip_subdir = "OptimalDesign"
-        self.zip_filename = "%s.zip" % zip_subdir
-        self.file = StringIO.StringIO()
-        zf = zipfile.ZipFile(self.file,"w")
-
-        for fpath in files:
-            zf.write(os.path.join(self.folder,fpath),os.path.join(zip_subdir,fpath))
-        zf.close()
-
-        return self
+            return self
 
     @staticmethod
     def pearsonr(signals,nstim):

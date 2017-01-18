@@ -1,3 +1,6 @@
+0.0.11 - 01/17/2017
+* debug generation of ITI's from truncated distribution
+
 0.0.10 - 01/10/2017
 * remove direct support for GUI
 

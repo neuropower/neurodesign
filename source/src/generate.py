@@ -1,6 +1,7 @@
 import numpy as np
 from neurodesign import msequence
 import scipy.stats as stats
+import scipy
 
 def order(nstim,ntrials,probabilities,ordertype,seed=1234):
     '''
@@ -63,38 +64,36 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
     :returns iti: A list with the created ITI's
     '''
 
-    lam = None
-    check = False
-    while check == False:
+    if model == "fixed":
+        smp = [mean]*ntrials
 
-        if model == "fixed":
-            smp = [mean]*ntrials
+    elif model == "uniform":
+        mean = (min+max)/2.
+        maxdur = mean*ntrials
+        success = 0
+        ESd = np.sqrt(((max-min)**2/12.)/ntrials)
+        while success == 0:
+            seed=seed+20
+            np.random.seed(seed)
+            smp = np.random.uniform(min,max,ntrials)
+            if np.sum(smp[1:])<maxdur and (np.mean(smp)-mean)<ESd:
+                success = 1
 
-        elif model == "uniform":
-            mean = (min+max)/2.
-            maxdur = mean*ntrials
-            success = 0
-            while success == 0:
-                seed=seed+20
-                np.random.seed(seed)
-                smp = np.random.uniform(min,max,ntrials)
-                if np.sum(smp[1:])<maxdur:
-                    success = 1
-
-        elif model == "exponential":
-            if not lam:
-                try:
-                    lam = compute_lambda(min,max,mean)
-                except:
-                    '''what to do?'''
-            maxdur = mean*ntrials
-            success = 0
-            while success == 0:
-                seed = seed+20
-                np.random.seed(seed)
-                smp = rtexp(ntrials,lam,min,max,seed=seed)
-                if np.sum(smp[1:])<maxdur:
-                    success = 1
+    elif model == "exponential":
+        if not lam:
+            try:
+                lam = compute_lambda(min,max,mean)
+            except ValueError as err:
+                raise ValueError(err)
+        ESd = np.sqrt(lam**2/float(ntrials))
+        maxdur = mean*ntrials
+        success = 0
+        while success == 0:
+            seed = seed+20
+            np.random.seed(seed)
+            smp = rtexp(ntrials,lam,min,max,seed=seed)
+            if np.sum(smp[1:])<maxdur and abs(np.mean(smp)-mean)<(ESd/4.):
+                success = 1
 
     return smp,lam
 
@@ -102,28 +101,12 @@ def compute_lambda(lower,upper,mean):
     a = float(lower)
     b = float(upper)
     m = float(mean)
-    res = 1
-    rng = np.arange(10**(-10),1000,res)
-    done = False
-    while done == False:
-        diff=[]
-        for x in rng:
-            diff.append(stats.truncexpon((b-a)/x,loc=a,scale=x).mean()-m)
-        diff = np.array(diff)
-        if np.all(diff>0):
-            raise ValueError('Impossible to sample from this truncated exponential distribution.  The mean is too far from the maximum.  Either decrease the maximum or increase the mean.')
-            done = True
-        elif np.all(diff<0):
-            raise ValueError('Impossible to sample from this truncated exponential distribution.  The mean is too close to the maximum.  The maximum should be higher than twice the mean.  Either increase the maximum or decrease the mean.')
-            done = True
-        else:
-            if res<10**(-10):
-                out = rng[idx]
-                done = True
-            idx = np.min(np.where(diff>0))
-            res = res/10.
-            rng = np.arange(rng[idx-1],rng[idx],res)
-    return out
+    opt = scipy.optimize.minimize(difexp,50,args=(a,b,m),bounds=((10**(-9),100),),method="L-BFGS-B")
+    return opt.x[0]
+
+def difexp(lam,lower,upper,mean):
+    diff = stats.truncexpon((float(upper)-float(lower))/float(lam),loc=float(lower),scale=float(lam)).mean()-float(mean)
+    return abs(diff)
 
 def rtexp(ntrials,lam,lower,upper,seed):
     a = float(lower)

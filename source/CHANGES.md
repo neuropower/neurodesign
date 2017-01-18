@@ -1,3 +1,6 @@
+0.0.12 - 01/18/2017
+* debug generation of ITI's from truncated distribution
+
 0.0.11 - 01/17/2017
 * debug generation of ITI's from truncated distribution
 

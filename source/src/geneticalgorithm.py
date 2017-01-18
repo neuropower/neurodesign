@@ -7,7 +7,7 @@ from numpy import transpose as t
 from scipy.special import gamma
 from collections import Counter
 import pandas as pd
-from neurodesign import msequence, generate, report
+from src import msequence, generate, report
 import itertools
 import scipy.linalg
 import json
@@ -19,6 +19,8 @@ import StringIO
 import shutil
 import copy
 import sklearn.cluster
+import time
+import progressbar
 
 
 class design(object):
@@ -59,8 +61,11 @@ class design(object):
         :type maxrep: integer
         :returns repcheck: Boolean indicating maximum repeats are respected
         '''
-        repcheck = not ''.join(
-            str(e) for e in [0] * maxrep) in ''.join(str(e) for e in self.order)
+        for stim in range(self.experiment.n_stimuli):
+            repcheck = not ''.join(
+                str(e) for e in [stim] * maxrep) in ''.join(str(e) for e in self.order)
+            if repcheck == False:
+                break
 
         return repcheck
 
@@ -846,7 +851,8 @@ class population(object):
             self.clear()
             self.add_new_designs(weights=[1, 0, 0, 0])
             # loop
-            for generation in range(self.preruncycles):
+            bar = progressbar.ProgressBar()
+            for generation in bar(range(self.preruncycles)):
                 self.to_next_generation(seed=self.seed, weights=[1, 0, 0, 0])
                 if self.finished:
                     continue
@@ -856,7 +862,8 @@ class population(object):
             self.clear()
             self.add_new_designs(weights=[1, 0, 0, 0])
             # loop
-            for generation in range(self.preruncycles):
+            bar = progressbar.ProgressBar()
+            for generation in bar(range(self.preruncycles)):
                 self.to_next_generation(seed=self.seed, weights=[0, 1, 0, 0])
                 if self.finished:
                     continue
@@ -866,7 +873,8 @@ class population(object):
         self.clear()
         self.add_new_designs()
         # loop
-        for generation in range(self.cycles):
+        bar = progressbar.ProgressBar()
+        for generation in bar(range(self.cycles)):
             self.to_next_generation(seed=self.seed)
             if self.finished:
                 continue

@@ -1,3 +1,6 @@
+0.0.13 - 01/18/2017
+* debug max number of repeats
+
 0.0.12 - 01/18/2017
 * debug generation of ITI's from truncated distribution
 

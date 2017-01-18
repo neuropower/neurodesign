@@ -17,7 +17,7 @@ import matplotlib.gridspec as gridspec
 from pdfrw import PdfReader, PdfDict
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
-import src
+import neurodesign
 import os
 
 def make_report(POP,outfile="NeuroDesign.pdf"):

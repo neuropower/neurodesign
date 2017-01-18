@@ -1,5 +1,5 @@
 import numpy as np
-from src import msequence
+from neurodesign import msequence
 import scipy.stats as stats
 import scipy
 

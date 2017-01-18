@@ -7,7 +7,7 @@ from numpy import transpose as t
 from scipy.special import gamma
 from collections import Counter
 import pandas as pd
-from src import msequence, generate, report
+from neurodesign import msequence, generate, report
 import itertools
 import scipy.linalg
 import json

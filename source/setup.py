@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='neurodesign',
-      version='0.0.13',
+      version='0.0.14',
       description='Package for design optimisation for fMRI experiments',
       author='Joke Durnez',
       author_email='joke.durnez@gmail.com',
@@ -30,6 +30,7 @@ setup(name='neurodesign',
       "reportlab",
       "cStringIO",
       "seaborn",
-      "pdfrw"
+      "pdfrw",
+      "progressbar"
       ],
       zip_safe=False)

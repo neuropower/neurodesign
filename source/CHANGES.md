@@ -1,3 +1,7 @@
+0.0.14 - 01/19/2017
+* improve which designs are outputted
+* improve report
+
 0.0.13 - 01/18/2017
 * debug max number of repeats
 

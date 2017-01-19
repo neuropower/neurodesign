@@ -600,6 +600,7 @@ class population(object):
         self.designs = []
         self.optima = []
         self.bestdesign = None
+        self.cov = None
 
     def change_seed(self):
         '''
@@ -877,7 +878,7 @@ class population(object):
         for generation in bar(range(self.cycles)):
             self.to_next_generation(seed=self.seed)
             if self.finished:
-                continue
+                    continue
 
         return self
 
@@ -954,28 +955,46 @@ class population(object):
 
         return self
 
+    def evaluate(self):
+        # select designs: best from k-means clusters
+        shape = self.bestdesign.Xconv.shape
+        xdim = np.zeros(np.product(shape))
+        des = np.zeros([np.product(shape), len(self.designs)])
+        efficiencies = np.array([x.F for x in self.designs])
+        for d in range(len(self.designs)):
+            hrf = []
+            for stim in range(shape[1]):
+                hrf = hrf + self.designs[d].Xconv[:, stim].tolist()
+            des[:, d] = hrf
+        clus = sklearn.cluster.k_means(des.T, self.outdes,random_state=self.seed)[1]
+        out = []
+        des = []
+        cl = []
+        first = 0
+        for c in range(self.outdes):
+            ids = np.where(clus==c)[0]
+            id_ordered = ids[np.flipud(np.argsort(efficiencies[ids]))]
+            out.append(first)
+            for d in id_ordered:
+                cl.append(c)
+                des.append(self.designs[d])
+                first = first+1
+        self.designs = des
+        self.out = out
+        self.clus = cl
+
+        signals = [x.Xconv for x in self.designs]
+        co = self.pearsonr(signals,3)
+        self.cov = co
+
+        return self
+
     def download(self):
         if not self.folder:
             raise ValueError('No folder defined to download output.')
         else:
-
-            # select designs: best from k-means clusters
-            shape = self.bestdesign.Xconv.shape
-            xdim = np.zeros(np.product(shape))
-            des = np.zeros([np.product(shape), len(self.designs)])
-            efficiencies = [x.F for x in self.designs]
-
-            for d in range(len(self.designs)):
-                hrf = []
-                for stim in range(shape[1]):
-                    hrf = hrf + self.designs[d].Xconv[:, stim].tolist()
-                des[:, d] = hrf
-            clus = sklearn.cluster.k_means(des.T, self.outdes)
-            ids = []
-            for k in range(self.outdes):
-                efs = [eff for ind, eff in enumerate(
-                    efficiencies) if clus[1][ind] == k]
-                ids.append(np.where(efficiencies == np.max(efs))[0][0])
+            if self.cov==None:
+                self.evaluate()
 
             # empty folder
             if os.path.exists(self.folder):
@@ -995,7 +1014,7 @@ class population(object):
 
                 os.mkdir(os.path.join(self.folder, "design_" + str(des)))
 
-                design = self.designs[ids[des]]
+                design = self.designs[self.out[des]]
 
                 for stim in range(self.exp.n_stimuli):
 

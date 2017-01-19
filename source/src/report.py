@@ -21,6 +21,9 @@ import neurodesign
 import os
 
 def make_report(POP,outfile="NeuroDesign.pdf"):
+    if POP.cov == None:
+        POP.evaluate()
+
     styles=getSampleStyleSheet()
 
     doc = SimpleDocTemplate(outfile,pagesize=letter,
@@ -48,11 +51,8 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     corr='During the optimisation, the designs are mixed with each other to find better combinations.  As such, the designs can look very similar. Actually, the genetic algorithm uses natural selection as a basis, and as such, the designs can be clustered in families.  This is the covariance matrix between the final {0} designs'.format(POP.G)
     Story.append(Paragraph(corr, styles["Normal"]))
 
-    clus = find_families(POP)
-    co = covariance_matrix(POP,clus)
-
     fig = plt.figure(figsize=(6, 6))
-    plt.imshow(co,interpolation="nearest")
+    plt.imshow(POP.cov,interpolation="nearest")
     plt.colorbar()
     imgdata = cStringIO.StringIO()
     fig.savefig(imgdata, format='pdf')
@@ -68,35 +68,30 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     Story.append(Paragraph("Selected designs", styles["Heading2"]))
     Story.append(Spacer(1, 12))
 
-    designs='The following figure shows in the upper panel the optimisation score over the different generations.  Below are the expected signals of the three best designs from different families.  Next to each design is the covariance matrix between the regressors, and the diagonalmatrix with the eigenvalues of the design matrix.'
+    designs='The following figure shows in the upper panel the optimisation score over the different generations.  Below are the expected signals of the best designs from different families, more specific and in relation with the covariance matrix, designs {0}.  Next to each design is the covariance matrix between the regressors, and the diagonalmatrix with the eigenvalues of the design matrix.'.format(str(POP.out)[1:-1])
     Story.append(Paragraph(designs, styles["Normal"]))
 
-    efficiencies = [x.F for x in POP.designs]
-    ids = []
-    for k in range(len(np.unique(clus[1]))):
-        efs = [eff for ind,eff in enumerate(efficiencies) if clus[1][ind]==k]
-        ids.append(np.where(efficiencies==np.max(efs))[0][0])
-
-    fig = plt.figure(figsize=(10, 14))
-    gs = gridspec.GridSpec(4,5)
-    plt.subplot(gs[0,:])
+    fig = plt.figure(figsize=(12, 18))
+    gs = gridspec.GridSpec(POP.outdes+4,5)
+    plt.subplot(gs[:2,:])
     plt.plot(POP.optima)
 
-    for des in range(3):
-        design = POP.designs[ids[des]]
-        stdes = des+1
+    for des in range(POP.outdes):
+        design = POP.designs[POP.out[des]]
+        stdes = des+2
         plt.subplot(gs[stdes,:3])
         plt.plot(design.Xconv,lw=2)
-
+        plt.axis('off')
         plt.subplot(gs[stdes,3])
         varcov = np.corrcoef(design.Xconv.T)
-        plt.imshow(varcov,interpolation='nearest')
-        plt.colorbar()
-
+        plt.imshow(varcov,interpolation='nearest',clim=(-1,1),cmap="RdBu")
+        plt.axis('off')
+        plt.colorbar(ticks=[-1,0,1])
         plt.subplot(gs[stdes,4])
         eigenv = np.diag(np.linalg.svd(design.Xconv.T)[1])
-        plt.imshow(eigenv,interpolation='nearest')
-        plt.colorbar()
+        plt.imshow(eigenv,interpolation='nearest',clim=(0,1))
+        plt.axis('off')
+        plt.colorbar(ticks=[0,1])
 
     imgdata = cStringIO.StringIO()
     fig.savefig(imgdata, format='pdf')
@@ -171,32 +166,6 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     Story.append(Table(opt,rowHeights=13))
 
     doc.build(Story)
-
-def find_families(POP):
-    # paste together design matrices over stimuli
-    shape = POP.bestdesign.Xconv.shape
-    xdim = np.zeros(np.product(shape))
-    des = np.zeros([np.product(shape),len(POP.designs)])
-    for d in range(len(POP.designs)):
-        hrf = []
-        for stim in range(shape[1]):
-            hrf=hrf+POP.designs[d].Xconv[:,stim].tolist()
-        des[:,d]=hrf
-
-    # find 3 clusters of designs
-    clus = sklearn.cluster.k_means(des.T,3,random_state=1)
-
-    return clus
-
-def covariance_matrix(POP,clusters):
-    order = sorted(range(len(clusters[1])), key=lambda k: clusters[1][k])
-    # sort correlation matrix by cluster
-    signals = [x.Xconv for x in POP.designs]
-    co = POP.pearsonr(signals,3)
-    co = co[order,:]
-    co = co[:,order]
-
-    return co
 
 def form_xo_reader(imgdata):
     page, = PdfReader(imgdata).pages

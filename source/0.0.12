@@ -1,9 +1,0 @@
-Collecting neurodesign
-  Downloading neurodesign-0.0.12.tar.gz (123kB)
-Building wheels for collected packages: neurodesign
-  Running setup.py bdist_wheel for neurodesign: started
-  Running setup.py bdist_wheel for neurodesign: finished with status 'done'
-  Stored in directory: /Users/Joke/Library/Caches/pip/wheels/96/b5/d2/730440caf3ee30d82d1b3e54b7b53ff66db1668cc7c73c0155
-Successfully built neurodesign
-Installing collected packages: neurodesign
-Successfully installed neurodesign-0.0.12

@@ -1,3 +1,8 @@
+0.0.15 - 01/31/2017
+* debug LinAlgError
+* debug necessity for calculating both Fe and Fd --> speed up
+* debug initial population weights
+
 0.0.14 - 01/19/2017
 * improve which designs are outputted
 * improve report

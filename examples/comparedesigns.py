@@ -29,7 +29,7 @@ DES = geneticalgorithm.design(
 # expand to design matrix
 
 DES.designmatrix()
-DES.FeCalc()
+DES.FCalc(weights=[0,0.5,0.25,0.25])
 DES.FdCalc()
 DES.FcCalc()
 DES.FfCalc()

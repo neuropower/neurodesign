@@ -232,15 +232,19 @@ class design(object):
         try:
             invM = scipy.linalg.inv(self.X)
         except scipy.linalg.LinAlgError:
-            invM = scipy.linalg.pinv(self.X)
-        invM = np.array(invM)
-        st1 = np.dot(self.CX, invM)
-        CMC = np.dot(st1, t(self.CX))
-        if Aoptimality == True:
-            self.Fe = float(self.CX.shape[0] / np.matrix.trace(CMC))
-        else:
-            self.Fe = float(np.linalg.det(CMC)**(-1 / len(self.C)))
-        self.Fe = self.Fe / self.experiment.FeMax
+            try:
+                invM = scipy.linalg.pinv(self.X)
+            except numpy.linalg.linalg.LinAlgError:
+                self.Fe = np.nan
+            else:
+                invM = np.array(invM)
+                st1 = np.dot(self.CX, invM)
+                CMC = np.dot(st1, t(self.CX))
+                if Aoptimality == True:
+                    self.Fe = float(self.CX.shape[0] / np.matrix.trace(CMC))
+                else:
+                    self.Fe = float(np.linalg.det(CMC)**(-1 / len(self.C)))
+                self.Fe = self.Fe / self.experiment.FeMax
         return self
 
     def FdCalc(self, Aoptimality=True):
@@ -253,14 +257,18 @@ class design(object):
         try:
             invM = scipy.linalg.inv(self.Z)
         except scipy.linalg.LinAlgError:
-            invM = scipy.linalg.pinv(self.Z)
-        invM = np.array(invM)
-        CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
-        if Aoptimality == True:
-            self.Fd = float(len(self.C) / np.matrix.trace(CMC))
-        else:
-            self.Fd = float(np.linalg.det(CMC)**(-1 / len(self.C)))
-        self.Fd = self.Fd / self.experiment.FdMax
+            try:
+                invM = scipy.linalg.pinv(self.Z)
+            except numpy.linalg.linalg.LinAlgError:
+                self.Fe = np.nan
+            else:
+                invM = np.array(invM)
+                CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
+                if Aoptimality == True:
+                    self.Fd = float(len(self.C) / np.matrix.trace(CMC))
+                else:
+                    self.Fd = float(np.linalg.det(CMC)**(-1 / len(self.C)))
+                self.Fd = self.Fd / self.experiment.FdMax
         return self
 
     def FcCalc(self, confoundorder=3):
@@ -299,17 +307,21 @@ class design(object):
         self.Ff = 1 - self.Ff / self.experiment.FfMax
         return self
 
-    def FCalc(self, weights):
+    def FCalc(self, weights,confoundorder=3,Aoptimality=True):
         '''
         Compute weighted average of efficiencies.
 
         :param weights: Weights given to each of the efficiency metrics in this order: Estimation, Detection, Frequencies, Confounders.
         :type weights: list of floats
         '''
-        self.FeCalc()
-        self.FdCalc()
+        self.Fe = 0
+        self.Fd = 0
+        if weights[0]>0:
+            self = self.FeCalc(Aoptimality)
+        if weights[1]>0:
+            self = self.FdCalc(Aoptimality)
         self.FfCalc()
-        self.FcCalc()
+        self.FcCalc(confoundorder)
         matr = np.array([self.Fe, self.Fd, self.Ff, self.Fc])
         self.F = np.sum(weights * matr)
         return self
@@ -639,14 +651,10 @@ class population(object):
 
         # develop
         design.designmatrix()
-        if weights[0] > 0:
-            design.FeCalc(Aoptimality=self.Aoptimality)
-        if weights[1] > 0:
-            design.FdCalc(Aoptimality=self.Aoptimality)
-        design.FcCalc(self.exp.confoundorder)
-        design.FfCalc()
 
-        design.FCalc(weights)
+        design.FCalc(weights,self.exp.confoundorder,self.Aoptimality)
+        if np.isnan(design.Fe) or np.isnan(design.Fd):
+            return False
 
         return design
 
@@ -861,7 +869,7 @@ class population(object):
 
         if self.weights[1] > 0:
             self.clear()
-            self.add_new_designs(weights=[1, 0, 0, 0])
+            self.add_new_designs(weights=[0, 1, 0, 0])
             # loop
             bar = progressbar.ProgressBar()
             for generation in bar(range(self.preruncycles)):

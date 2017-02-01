@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='neurodesign',
-      version='0.0.17',
+      version='0.0.18',
       description='Package for design optimisation for fMRI experiments',
       author='Joke Durnez',
       author_email='joke.durnez@gmail.com',
@@ -9,7 +9,7 @@ setup(name='neurodesign',
       packages=['neurodesign'],
       package_dir={'neurodesign':'src'},
       package_data={'neurodesign':['media/NeuroDes.png']},
-      install_require=[
+      install_requires=[
       "numpy",
       "scipy",
       "collections",
@@ -28,7 +28,6 @@ setup(name='neurodesign',
       "time",
       "matplotlib",
       "reportlab",
-      "cStringIO",
       "seaborn",
       "pdfrw",
       "progressbar"

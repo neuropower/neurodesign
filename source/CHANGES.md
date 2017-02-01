@@ -1,3 +1,6 @@
+0.0.18 - 02/01/2017
+* remove typo in install_requires
+
 0.0.17 - 02/01/2017
 * remove requirements.txt
 

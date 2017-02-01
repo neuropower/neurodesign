@@ -1,3 +1,6 @@
+0.0.16 - 02/01/2017
+* debug memory problem induced in 0.0.15
+
 0.0.15 - 01/31/2017
 * debug LinAlgError
 * debug necessity for calculating both Fe and Fd --> speed up

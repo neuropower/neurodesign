@@ -42,6 +42,8 @@ class design(object):
         self.order = order
         self.ITI = ITI
         self.onsets = onsets
+        self.Fe = 0
+        self.Fd = 0
 
         self.experiment = experiment
 
@@ -235,16 +237,16 @@ class design(object):
             try:
                 invM = scipy.linalg.pinv(self.X)
             except numpy.linalg.linalg.LinAlgError:
-                self.Fe = np.nan
-            else:
-                invM = np.array(invM)
-                st1 = np.dot(self.CX, invM)
-                CMC = np.dot(st1, t(self.CX))
-                if Aoptimality == True:
-                    self.Fe = float(self.CX.shape[0] / np.matrix.trace(CMC))
-                else:
-                    self.Fe = float(np.linalg.det(CMC)**(-1 / len(self.C)))
-                self.Fe = self.Fe / self.experiment.FeMax
+                invM = np.nan
+        sys.exc_clear()
+        invM = np.array(invM)
+        st1 = np.dot(self.CX, invM)
+        CMC = np.dot(st1, t(self.CX))
+        if Aoptimality == True:
+            self.Fe = float(self.CX.shape[0] / np.matrix.trace(CMC))
+        else:
+            self.Fe = float(np.linalg.det(CMC)**(-1 / len(self.C)))
+        self.Fe = self.Fe / self.experiment.FeMax
         return self
 
     def FdCalc(self, Aoptimality=True):
@@ -260,15 +262,15 @@ class design(object):
             try:
                 invM = scipy.linalg.pinv(self.Z)
             except numpy.linalg.linalg.LinAlgError:
-                self.Fe = np.nan
-            else:
-                invM = np.array(invM)
-                CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
-                if Aoptimality == True:
-                    self.Fd = float(len(self.C) / np.matrix.trace(CMC))
-                else:
-                    self.Fd = float(np.linalg.det(CMC)**(-1 / len(self.C)))
-                self.Fd = self.Fd / self.experiment.FdMax
+                invM = np.nan
+        sys.exc_clear()
+        invM = np.array(invM)
+        CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
+        if Aoptimality == True:
+            self.Fd = float(len(self.C) / np.matrix.trace(CMC))
+        else:
+            self.Fd = float(np.linalg.det(CMC)**(-1 / len(self.C)))
+        self.Fd = self.Fd / self.experiment.FdMax
         return self
 
     def FcCalc(self, confoundorder=3):
@@ -307,19 +309,18 @@ class design(object):
         self.Ff = 1 - self.Ff / self.experiment.FfMax
         return self
 
-    def FCalc(self, weights,confoundorder=3,Aoptimality=True):
+    def FCalc(self, weights,Aoptimality=True,confoundorder=3):
         '''
         Compute weighted average of efficiencies.
 
         :param weights: Weights given to each of the efficiency metrics in this order: Estimation, Detection, Frequencies, Confounders.
         :type weights: list of floats
         '''
-        self.Fe = 0
-        self.Fd = 0
+
         if weights[0]>0:
-            self = self.FeCalc(Aoptimality)
+            self.FeCalc(Aoptimality)
         if weights[1]>0:
-            self = self.FdCalc(Aoptimality)
+            self.FdCalc(Aoptimality)
         self.FfCalc()
         self.FcCalc(confoundorder)
         matr = np.array([self.Fe, self.Fd, self.Ff, self.Fc])
@@ -651,9 +652,8 @@ class population(object):
 
         # develop
         design.designmatrix()
-
-        design.FCalc(weights,self.exp.confoundorder,self.Aoptimality)
-        if np.isnan(design.Fe) or np.isnan(design.Fd):
+        design.FCalc(weights,confoundorder=self.exp.confoundorder,Aoptimality=self.Aoptimality)
+        if np.isnan(design.F):
             return False
 
         return design

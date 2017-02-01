@@ -1,3 +1,6 @@
+0.0.17 - 02/01/2017
+* remove requirements.txt
+
 0.0.16 - 02/01/2017
 * debug memory problem induced in 0.0.15
 

@@ -69,7 +69,7 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
 
     elif model == "uniform":
         mean = (min+max)/2.
-        maxdur = mean*ntrials
+        maxdur = mean*ntrials-0.5
         success = 0
         ESd = np.sqrt(((max-min)**2/12.)/ntrials)
         while success == 0:
@@ -86,7 +86,7 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
             except ValueError as err:
                 raise ValueError(err)
         ESd = np.sqrt(lam**2/float(ntrials))
-        maxdur = mean*ntrials
+        maxdur = mean*ntrials-0.5
         success = 0
         while success == 0:
             seed = seed+20

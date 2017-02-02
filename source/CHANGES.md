@@ -1,3 +1,18 @@
+0.0.23 - 02/01/2017
+* remove requirements for now
+
+0.0.22 - 02/01/2017
+* update requirements
+
+0.0.21 - 02/01/2017
+* remove itertools from requirements
+
+0.0.20 - 02/01/2017
+* remove collections from requirements
+
+0.0.19 - 02/01/2017
+* pypi problems
+
 0.0.18 - 02/01/2017
 * remove typo in install_requires
 

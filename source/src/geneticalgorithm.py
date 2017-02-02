@@ -10,7 +10,6 @@ import pandas as pd
 from neurodesign import msequence, generate, report
 import itertools
 import scipy.linalg
-import json
 import os
 import sys
 import numpy as np

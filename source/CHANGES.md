@@ -1,3 +1,6 @@
+0.0.24 - 02/02/2017
+* add some extra space for max duration (0.5s) to avoid trials exceeding the experiment duration
+
 0.0.23 - 02/01/2017
 * remove requirements for now
 

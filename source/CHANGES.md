@@ -1,3 +1,6 @@
+0.0.25 - 02/06/2017
+* avoid getting stuck while trying to find blocked designs
+
 0.0.24 - 02/02/2017
 * add some extra space for max duration (0.5s) to avoid trials exceeding the experiment duration
 

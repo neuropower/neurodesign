@@ -683,9 +683,10 @@ class population(object):
         NDes = 0
         self.change_seed()
 
+        k = 0
         while NDes < np.sum(R):
             self.change_seed()
-            ind = np.sum(NDes > np.cumsum(R))
+            ind = np.sum(NDes >= np.cumsum(R))
             ordertype = ['blocked', 'random', 'msequence'][ind]
 
             order = generate.order(self.exp.n_stimuli, self.exp.n_trials,
@@ -716,7 +717,6 @@ class population(object):
         '''
 
         # remove duplicates and replace by random designs
-
         n = 0
         rm = 0
         while n == 0:
@@ -852,7 +852,7 @@ class population(object):
         '''
 
         if (self.exp.FcMax == 1 and self.exp.FfMax == 1):
-            self.max_eff()
+            self.exp.max_eff()
 
         if self.weights[0] > 0:
             # add new designs

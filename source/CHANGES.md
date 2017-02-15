@@ -1,3 +1,6 @@
+0.0.26 - 02/14/2017
+* patch reoccurring (but rare) problem with too long a design
+
 0.0.25 - 02/06/2017
 * avoid getting stuck while trying to find blocked designs
 

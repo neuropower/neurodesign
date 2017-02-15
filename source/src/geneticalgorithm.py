@@ -174,6 +174,9 @@ class design(object):
         stimonsets = onsetX
 
         # find indices in resolution scale of stimuli
+        if np.max(onsetX)>np.max(self.experiment.r_tp):
+            print("WARNING: the latest onset is later than the duration of the experiment. Cannot compute efficiency.")
+            return False
         XindStim = [int(np.where(self.experiment.r_tp == y)[0])
                     for y in onsetX]
 
@@ -650,7 +653,10 @@ class population(object):
             return False
 
         # develop
-        design.designmatrix()
+
+        out = design.designmatrix()
+        if out == False:
+            return False
         design.FCalc(weights,confoundorder=self.exp.confoundorder,Aoptimality=self.Aoptimality)
         if np.isnan(design.F):
             return False

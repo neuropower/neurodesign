@@ -70,7 +70,7 @@ class Msequence(object):
         shift = 0
         ms = self.Mseq(baseVal,powerVal,shift,keys)
         if mLen > len(ms):
-            rep = np.ceil(mLen/len(ms))
+            rep = int(np.ceil(mLen/len(ms)))
             ms = np.tile(ms,rep)
         if not mLen%len(ms) == 0:
             ms = ms[:mLen]

@@ -158,7 +158,7 @@ class design(object):
             for x in np.arange(0, self.experiment.n_trials, self.experiment.restnum)[1:][::-1]:
                 orderli.insert(x, "R")
                 ITIli.insert(x, self.experiment.restdur)
-            ITIli = np.array(ITIli) + self.experiment.trial_duration
+            ITIli = [y+self.experiment.trial_duration  if not x == "R" else y for x, y in zip(orderli, ITIli)]
             onsets = np.cumsum(ITIli) - ITIli[0]
             self.onsets = [y for x, y in zip(orderli, onsets) if not x == "R"]
         else:

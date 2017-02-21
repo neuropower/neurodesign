@@ -6,18 +6,18 @@ Neurodesign documentation
 
 Geneticalgorithm: design optimisation
 -------------------------------------
-.. automodule:: neurodesign.geneticalgorithm
+.. automodule:: geneticalgorithm
    :members:
    :noindex:
 
 Generate: generating stimulus order and ITI's
 ---------------------------------------------
-.. automodule:: neurodesign.generate
+.. automodule:: generate
    :members:
    :noindex:
 
 Msequence: generating msequences
 --------------------------------
-.. automodule:: neurodesign.msequence
+.. automodule:: msequence
    :members:
    :noindex:

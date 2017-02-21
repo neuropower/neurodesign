@@ -1,1 +1,15 @@
 neurodesign
+collections
+pandas
+itertools
+zipfile
+StringIO
+shutil
+copy
+sklearn
+time
+progressbar
+reportlab
+cStringIO
+seaborn
+pdfrw

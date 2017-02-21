@@ -22,8 +22,8 @@ Msequence: generating msequences
    :members:
    :noindex:
 
-Report:
--------
+Report: summarise results from geneticalgorithm
+-----------------------------------------------
 .. automodule:: src.report
    :members:
    :noindex:

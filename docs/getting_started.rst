@@ -13,11 +13,6 @@ neurodesign is available on pypi.  To install, run::
 
   pip install neurodesign
 
-This is how the documentation looks like:
-
-.. image:: _static/screenshot.png
-   :scale: 40 %
-
 .. _about-designopt:
 
 About Design Optimisation Using the Genetic Algorithm

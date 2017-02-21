@@ -1,11 +1,7 @@
 collections
-itertools
 zipfile
-StringIO
-shutil
 copy
 time
 progressbar
 reportlab
 cStringIO
-pdfrw

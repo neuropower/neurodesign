@@ -7,4 +7,3 @@ reportlab
 reportlab.lib
 reportlab.platypus
 cStringIO
-import time

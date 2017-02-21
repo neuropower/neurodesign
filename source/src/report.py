@@ -1,4 +1,7 @@
 def make_report(POP,outfile="NeuroDesign.pdf"):
+    '''
+    Function to create a report of a finished design optimisation.
+    '''
     if POP.cov == None:
         POP.evaluate()
 

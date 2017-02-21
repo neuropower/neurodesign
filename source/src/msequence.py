@@ -31,7 +31,7 @@ class Msequence(object):
 
     def GenMseq(self,mLen,stimtypeno,seed):
         '''
-        Function specific to generate a maximum number of msequences for genetic algorithm.
+        Function to generate a random msequence given the length of the desired sequence and the number of different values.
 
         :param stimtypeno: Number of different stimulus types
         :type stimtypeno: integer
@@ -82,7 +82,7 @@ class Msequence(object):
 
     def Mseq(self,baseVal,powerVal,shift=None,whichSeq=None,userTaps=None):
         '''
-        Function to generate msequences
+        Function to generate a specific msequence given the base and power values.
 
         :param powerVal: The power of the msequence
         :type powerVal: integer

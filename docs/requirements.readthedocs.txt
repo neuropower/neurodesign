@@ -6,10 +6,8 @@ zipfile
 StringIO
 shutil
 copy
-sklearn
 time
 progressbar
 reportlab
 cStringIO
-seaborn
 pdfrw

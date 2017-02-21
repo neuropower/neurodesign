@@ -250,7 +250,7 @@ texinfo_documents = [
 
 import mock
 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.interpolate', 'scipy.stats','seaborn', 'sklearn.cluster','neurodesign']
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'matplotlib.gridspec','scipy.interpolate','scipy.special','numpy.linalg','scipy.stats','seaborn', 'neurodesign','pandas','scipy.linalg','scipy.sparse','sklearn','sklearn.cluster']
 for mod_name in MOCK_MODULES:
    sys.modules[mod_name] = mock.Mock()
 

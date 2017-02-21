@@ -5,6 +5,7 @@ zipfile
 StringIO
 shutil
 copy
+sklearn.cluster
 time
 progressbar
 reportlab

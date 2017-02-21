@@ -21,3 +21,9 @@ Msequence: generating msequences
 .. automodule:: src.msequence
    :members:
    :noindex:
+
+Report:
+-------
+.. automodule:: src.report
+   :members:
+   :noindex:

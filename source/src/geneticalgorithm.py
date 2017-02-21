@@ -729,15 +729,18 @@ class population(object):
             orders = [x.order for x in self.designs]
             cors = np.corrcoef(orders)
             isone = np.isclose(cors, 1.)
-            np.fill_diagonal(isone, 0)
-            if np.sum(isone) == 0:
+            if len(isone) == 1:
                 n = 1
             else:
-                ind = np.where(isone)
-                remove = ind[1][ind[0] == ind[0][0]]
-                self.designs = [des for ind, des in enumerate(
-                    self.designs) if not ind in remove]
-                rm = rm + len(remove)
+                np.fill_diagonal(isone, 0)
+                if np.sum(isone) == 0:
+                    n = 1
+                else:
+                    ind = np.where(isone)
+                    remove = ind[1][ind[0] == ind[0][0]]
+                    self.designs = [des for ind, des in enumerate(
+                        self.designs) if not ind in remove]
+                    rm = rm + len(remove)
 
         self.add_new_designs(R=[0, rm, 0], weights=weights)
 

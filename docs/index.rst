@@ -4,7 +4,7 @@
 Welcome to the neurodesign documentation!
 =========================================
 
-We have built a GUI for this package, in the form of an online toolbox available at `www.neuropowertools.org<http://www.neuropowertools.org>`.  The GUI uses functions from the neurodesign package.
+We have built a GUI for this package, in the form of an online toolbox available at `www.neuropowertools.org<http://www.neuropowertools.org>`_.  The GUI uses functions from the neurodesign package.
 
 .. toctree::
    :maxdepth: 4

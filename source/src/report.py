@@ -9,7 +9,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import cStringIO
-import StringIO
 import seaborn
 from pdfrw import PdfReader
 import numpy as np

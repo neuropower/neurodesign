@@ -1,3 +1,25 @@
+import time
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image,Table,PageBreak, Flowable
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.lib.utils import ImageReader
+import sklearn.cluster
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import cStringIO
+import StringIO
+import seaborn
+from pdfrw import PdfReader
+import numpy as np
+import matplotlib.gridspec as gridspec
+from pdfrw import PdfReader, PdfDict
+from pdfrw.buildxobj import pagexobj
+from pdfrw.toreportlab import makerl
+import neurodesign
+import os
+
 def make_report(POP,outfile="NeuroDesign.pdf"):
     '''
     Function to create a report of a finished design optimisation.

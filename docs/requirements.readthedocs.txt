@@ -1,9 +1,0 @@
-collections
-zipfile
-copy
-time
-progressbar
-reportlab
-reportlab.lib
-reportlab.platypus
-cStringIO

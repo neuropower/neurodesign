@@ -1,3 +1,6 @@
+0.0.28 - 02/20/2017
+* debug correlation check
+
 0.0.27 - 02/20/2017
 * debug rest durations
 * debug repeated msequences

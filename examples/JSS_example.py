@@ -24,6 +24,7 @@ DES1.FCalc(weights=[0.25,0.25,0.25,0.25])
 
 import matplotlib.pyplot as plt
 plt.plot(DES1.Xconv)
+plt.savefig("output/example_figure_1.pdf",format="pdf")
 
 DES2 = geneticalgorithm.design(
     order = [0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1],
@@ -37,8 +38,8 @@ print("Fd of Design 1: "+str(DES1.Fd))
 print("Fd of Design 2: "+str(DES2.Fd))
 
 DES3,DES4 = DES1.crossover(DES2,seed=2000)
-DES3.order
-DES4.order
+print(DES3.order)
+print(DES4.order)
 
 POP = geneticalgorithm.population(
     experiment=EXP,

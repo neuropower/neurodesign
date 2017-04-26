@@ -1,3 +1,7 @@
+0.1.00 - 04/26/2017
+* package underwent extensive testing through the online application
+* examples are added complementary to the manuscript under revision
+
 0.0.28 - 02/20/2017
 * debug correlation check
 

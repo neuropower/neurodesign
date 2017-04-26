@@ -8,6 +8,7 @@ The documentation of neurodesign is available at [ReadTheDocs](http://neurodesig
 
 ## File description
 
+'''
 *
 |---- docs              Contains the source code to generate the documentation.
 |                       with sphinx.
@@ -18,3 +19,4 @@ The documentation of neurodesign is available at [ReadTheDocs](http://neurodesig
 |       |
 |       |---- media     Folder contains the logo of neurodesign, which is used
                         in the reports.       
+'''

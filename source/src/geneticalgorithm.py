@@ -263,7 +263,7 @@ class design(object):
         except scipy.linalg.LinAlgError:
             try:
                 invM = scipy.linalg.pinv(self.Z)
-            except numpy.linalg.linalg.LinAlgError:
+            except np.linalg.linalg.LinAlgError:
                 invM = np.nan
         sys.exc_clear()
         invM = np.array(invM)

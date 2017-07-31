@@ -1,3 +1,13 @@
+0.1.02 - 07/31/2017
+* debug first ITI (should be 0)
+* debug Hardprob
+* debug maximum ITI with resolution
+* round ITI to resolution before computing onsets
+* added exceptions for longer designs
+
+0.1.01 - 07/03/2017
+* debug numpy exception
+
 0.1.00 - 04/26/2017
 * package underwent extensive testing through the online application
 * examples are added complementary to the manuscript under revision

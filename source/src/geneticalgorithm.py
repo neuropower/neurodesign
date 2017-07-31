@@ -83,7 +83,7 @@ class design(object):
             probcheck = False
         else:
             close = np.isclose(np.array(self.experiment.P),
-                               np.array(obsprob), atol=0.05)
+                               np.array(obsprob), atol=0.001)
             if not np.sum(close) == len(obsprob):
                 probcheck = False
             else:

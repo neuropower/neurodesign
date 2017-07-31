@@ -175,7 +175,7 @@ class design(object):
 
         # find indices in resolution scale of stimuli
         if np.max(onsetX)>np.max(self.experiment.r_tp):
-            print("WARNING: the latest onset is later than the duration of the experiment. Cannot compute efficiency: skipping design.")
+            print("WARNING: the latest onset is later than the duration of the experiment. Cannot compute efficiency: design impossible.")
             return False
         XindStim = [int(np.where(self.experiment.r_tp == y)[0])
                     for y in onsetX]
@@ -187,7 +187,7 @@ class design(object):
         for stimulus in xrange(self.experiment.n_stimuli):
             for dur in xrange(stim_duration_tp):
                 if (np.max(np.array(XindStim) + dur)+1)>(X_X.shape[0]):
-                    print("WARNING: the modeled experiment exceeds beyond the total experiment duration: skipping design.")
+                    print("WARNING: the modeled experiment exceeds beyond the total experiment duration: design impossible.")
                     return False
                 X_X[np.array(XindStim) + dur, int(stimulus)
                     ] = [1 if z == stimulus else 0 for z in self.order]

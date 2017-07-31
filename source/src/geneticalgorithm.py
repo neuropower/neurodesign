@@ -698,7 +698,7 @@ class population(object):
             order = generate.order(self.exp.n_stimuli, self.exp.n_trials,
                                    self.exp.P, ordertype=ordertype, seed=self.seed)
             ITI, ITIlam = generate.iti(ntrials=self.exp.n_trials, model=self.exp.ITImodel, min=self.exp.ITImin,
-                                       max=self.exp.ITImax, mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed)
+                                       max=(self.exp.ITImax+self.exp.resolution), mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed)
             if ITIlam:
                 self.exp.ITIlam = ITIlam
             des = design(order=order, ITI=ITI, experiment=self.exp)

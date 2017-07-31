@@ -159,11 +159,11 @@ class design(object):
                 orderli.insert(x, "R")
                 ITIli.insert(x, self.experiment.restdur)
             ITIli = [y+self.experiment.trial_duration  if not x == "R" else y for x, y in zip(orderli, ITIli)]
-            onsets = np.cumsum(ITIli) - ITIli[0]
+            onsets = np.cumsum(ITIli)
             self.onsets = [y for x, y in zip(orderli, onsets) if not x == "R"]
         else:
             ITIli = np.array(self.ITI) + self.experiment.trial_duration
-            self.onsets = np.cumsum(ITIli) - ITIli[0]
+            self.onsets = np.cumsum(ITIli)
         stimonsets = [x + self.experiment.t_pre for x in self.onsets]
 
         # round onsets to resolution
@@ -175,7 +175,7 @@ class design(object):
 
         # find indices in resolution scale of stimuli
         if np.max(onsetX)>np.max(self.experiment.r_tp):
-            print("WARNING: the latest onset is later than the duration of the experiment. Cannot compute efficiency.")
+            print("WARNING: the latest onset is later than the duration of the experiment. Cannot compute efficiency: skipping design.")
             return False
         XindStim = [int(np.where(self.experiment.r_tp == y)[0])
                     for y in onsetX]
@@ -186,6 +186,9 @@ class design(object):
             self.experiment.stim_duration / self.experiment.resolution)
         for stimulus in xrange(self.experiment.n_stimuli):
             for dur in xrange(stim_duration_tp):
+                if (np.max(np.array(XindStim) + dur)+1)>(X_X.shape[0]):
+                    print("WARNING: the modeled experiment exceeds beyond the total experiment duration: skipping design.")
+                    return False
                 X_X[np.array(XindStim) + dur, int(stimulus)
                     ] = [1 if z == stimulus else 0 for z in self.order]
 
@@ -420,7 +423,7 @@ class experiment(object):
         '''
         NulDesign = design(
             order=[np.argmin(self.P)] * self.n_trials,
-            ITI=[self.ITImean] * self.n_trials,
+            ITI=[0]+[self.ITImean] * (self.n_trials-1),
             experiment=self
         )
         NulDesign.designmatrix()
@@ -698,7 +701,7 @@ class population(object):
             order = generate.order(self.exp.n_stimuli, self.exp.n_trials,
                                    self.exp.P, ordertype=ordertype, seed=self.seed)
             ITI, ITIlam = generate.iti(ntrials=self.exp.n_trials, model=self.exp.ITImodel, min=self.exp.ITImin,
-                                       max=(self.exp.ITImax+self.exp.resolution), mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed)
+                                       max=(self.exp.ITImax+self.exp.resolution), mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed,resolution=self.exp.resolution)
             if ITIlam:
                 self.exp.ITIlam = ITIlam
             des = design(order=order, ITI=ITI, experiment=self.exp)

@@ -45,7 +45,7 @@ def order(nstim,ntrials,probabilities,ordertype,seed=1234):
 
     return order
 
-def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
+def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1234):
     '''
     Function will generate an order of stimuli.
 
@@ -59,6 +59,8 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
     :type mean: float
     :param max: The max ITI (required with "uniform" or "exponential")
     :type max: float
+    :param resolution: The resolution of the design: for rounding the ITI's
+    :type resolution: float
     :param seed: The seed with which the change point will be sampled.
     :type seed: integer or None
     :returns iti: A list with the created ITI's
@@ -77,6 +79,7 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
             np.random.seed(seed)
             smp = np.random.uniform(min,max,(ntrials-1))
             smp = np.append([0],smp)
+            smp = [np.floor(x / resolution)* resolution for x in smp]
             if np.sum(smp)<maxdur and (np.mean(smp)-mean)<ESd:
                 success = 1
 
@@ -93,6 +96,7 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
             seed = seed+20
             np.random.seed(seed)
             smp = rtexp((ntrials-1),lam,min,max,seed=seed)
+            smp = [np.floor(x / resolution)* resolution for x in smp]
             if np.sum(smp)<maxdur and abs(np.mean(smp)-mean)<(ESd/4.):
                 success = 1
             smp = np.append([0],smp)

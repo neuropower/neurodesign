@@ -8,13 +8,14 @@ The documentation of neurodesign is available at [ReadTheDocs](http://neurodesig
 
 ## File description
 
-*
-|---- docs              Contains the source code to generate the documentation.
-|                       with sphinx.
-|
-|---- examples          Contains scripts to perform a design optimalisation.
-|
-|---- source            Folder with the source code of the python package
-|       |
-|       |---- media     Folder contains the logo of neurodesign, which is used
-                        in the reports.       
+    *
+    |---- docs              Contains the source code to generate the documentation.
+    |                       with sphinx.
+    |
+    |---- examples          Contains scripts to perform a design optimalisation.
+    |
+    |---- source            Folder with the source code of the python package
+    |       |
+    |       |---- media     Folder contains the logo of neurodesign, which is used
+                            in the reports.       
+

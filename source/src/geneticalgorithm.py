@@ -186,7 +186,7 @@ class design(object):
             self.experiment.stim_duration / self.experiment.resolution)
         for stimulus in xrange(self.experiment.n_stimuli):
             for dur in xrange(stim_duration_tp):
-                if (np.max(np.array(XindStim) + dur)+1)>(X_X.shape[0]):
+                if np.max(np.array(XindStim) + dur)>=(X_X.shape[0]):
                     print("WARNING: the modeled experiment exceeds beyond the total experiment duration: design impossible.")
                     return False
                 X_X[np.array(XindStim) + dur, int(stimulus)

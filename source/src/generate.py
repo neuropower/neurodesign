@@ -65,18 +65,19 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
     '''
 
     if model == "fixed":
-        smp = [mean]*ntrials
+        smp = [0]+[mean]*(ntrials-1)
 
     elif model == "uniform":
         mean = (min+max)/2.
-        maxdur = mean*ntrials-0.5
+        maxdur = mean*(ntrials-1)-0.5
         success = 0
-        ESd = np.sqrt(((max-min)**2/12.)/ntrials)
+        ESd = np.sqrt(((max-min)**2/12.)/(ntrials-1))
         while success == 0:
             seed=seed+20
             np.random.seed(seed)
-            smp = np.random.uniform(min,max,ntrials)
-            if np.sum(smp[1:])<maxdur and (np.mean(smp)-mean)<ESd:
+            smp = np.random.uniform(min,max,(ntrials-1))
+            smp = np.append([0],smp)
+            if np.sum(smp)<maxdur and (np.mean(smp)-mean)<ESd:
                 success = 1
 
     elif model == "exponential":
@@ -85,24 +86,30 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,seed=1234):
                 lam = compute_lambda(min,max,mean)
             except ValueError as err:
                 raise ValueError(err)
-        ESd = np.sqrt(lam**2/float(ntrials))
-        maxdur = mean*ntrials-0.5
+        ESd = np.sqrt(lam**2/float(ntrials-1))
+        maxdur = mean*(ntrials-1)-0.5
         success = 0
         while success == 0:
             seed = seed+20
             np.random.seed(seed)
-            smp = rtexp(ntrials,lam,min,max,seed=seed)
-            if np.sum(smp[1:])<maxdur and abs(np.mean(smp)-mean)<(ESd/4.):
+            smp = rtexp((ntrials-1),lam,min,max,seed=seed)
+            if np.sum(smp)<maxdur and abs(np.mean(smp)-mean)<(ESd/4.):
                 success = 1
+            smp = np.append([0],smp)
 
-    return smp,lam
+            return smp,lam
 
 def compute_lambda(lower,upper,mean):
     a = float(lower)
     b = float(upper)
     m = float(mean)
     opt = scipy.optimize.minimize(difexp,50,args=(a,b,m),bounds=((10**(-9),100),),method="L-BFGS-B")
-    return opt.x[0]
+    check = rtexp(100000,opt.x[0],lower,upper,seed=1000)
+    if not np.isclose(np.mean(check),mean,rtol=0.1):
+        raise ValueError("Error when figuring out lambda for exponential distribution: can't compute lambda.")
+        return o
+    else:
+        return opt.x[0]
 
 def difexp(lam,lower,upper,mean):
     diff = stats.truncexpon((float(upper)-float(lower))/float(lam),loc=float(lower),scale=float(lam)).mean()-float(mean)

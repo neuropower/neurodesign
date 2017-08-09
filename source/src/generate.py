@@ -101,7 +101,7 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1
                 success = 1
             smp = np.append([0],smp)
 
-            return smp,lam
+    return smp,lam
 
 def compute_lambda(lower,upper,mean):
     a = float(lower)

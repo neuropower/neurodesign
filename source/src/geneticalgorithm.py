@@ -175,7 +175,7 @@ class design(object):
 
         # find indices in resolution scale of stimuli
         if np.max(onsetX)>np.max(self.experiment.r_tp):
-            print("WARNING: the latest onset is later than the duration of the experiment. Cannot compute efficiency: design impossible.")
+            # check ! 
             return False
         XindStim = [int(np.where(self.experiment.r_tp == y)[0])
                     for y in onsetX]
@@ -187,7 +187,7 @@ class design(object):
         for stimulus in xrange(self.experiment.n_stimuli):
             for dur in xrange(stim_duration_tp):
                 if np.max(np.array(XindStim) + dur)>=(X_X.shape[0]):
-                    print("WARNING: the modeled experiment exceeds beyond the total experiment duration: design impossible.")
+                    #tocheck
                     return False
                 X_X[np.array(XindStim) + dur, int(stimulus)
                     ] = [1 if z == stimulus else 0 for z in self.order]
@@ -700,10 +700,11 @@ class population(object):
 
             order = generate.order(self.exp.n_stimuli, self.exp.n_trials,
                                    self.exp.P, ordertype=ordertype, seed=self.seed)
-            ITI, ITIlam = generate.iti(ntrials=self.exp.n_trials, model=self.exp.ITImodel, min=self.exp.ITImin,
-                                       max=(self.exp.ITImax+self.exp.resolution), mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed,resolution=self.exp.resolution)
+            ITI,ITIlam = generate.iti(ntrials=self.exp.n_trials, model=self.exp.ITImodel, min=self.exp.ITImin, max=(self.exp.ITImax+self.exp.resolution), mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed,resolution=self.exp.resolution)
+
             if ITIlam:
                 self.exp.ITIlam = ITIlam
+
             des = design(order=order, ITI=ITI, experiment=self.exp)
 
             fulldes = self.check_develop(des, weights)

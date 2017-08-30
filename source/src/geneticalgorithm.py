@@ -175,7 +175,7 @@ class design(object):
 
         # find indices in resolution scale of stimuli
         if np.max(onsetX)>np.max(self.experiment.r_tp):
-            # check ! 
+            # check !
             return False
         XindStim = [int(np.where(self.experiment.r_tp == y)[0])
                     for y in onsetX]
@@ -200,10 +200,13 @@ class design(object):
                 deconvM[j:, self.experiment.laghrf * stim +
                         j] = X_X[:(self.experiment.n_tp - j), stim]
 
-        # downsample to TR
-        idx = [int(x) for x in np.arange(0, self.experiment.n_tp,
+        # downsample to TR and hrf_precision
+        idxX = [int(x) for x in np.arange(0, self.experiment.n_tp,
                                          self.experiment.TR / self.experiment.resolution)]
-        deconvMdown = deconvM[idx, :]
+        idxY = [int(x) for x in np.arange(0, int(self.experiment.laghrf * self.experiment.n_stimuli),
+                                         self.experiment.hrf_precision/self.experiment.resolution)]
+        deconvMdown = deconvM[idxX, :]
+        deconvMdown = deconvMdown[:, idxY]
         Xwhite = np.dot(
             np.dot(t(deconvMdown), self.experiment.white), deconvMdown)
 
@@ -216,6 +219,7 @@ class design(object):
         # downsample to TR
         idx = [int(x) for x in np.arange(0, self.experiment.n_tp,
                                          self.experiment.TR / self.experiment.resolution)]
+
         X_Z = X_Z[idx, :]
         X_X = X_X[idx, :]
         Zwhite = t(X_Z) * self.experiment.white * X_Z
@@ -378,10 +382,12 @@ class experiment(object):
     :type ITImean: float
     :param ITImax: The max ITI (required with "uniform" or "exponential")
     :type ITImax: float
+    :type hrf_precision: The precision to estimate the hrf (s)
+    :type hrf_precision: float
 
     '''
 
-    def __init__(self, TR, P, C, rho, stim_duration, n_stimuli, ITImodel=None, ITImin=None, ITImax=None, ITImean=None, restnum=0, restdur=0, t_pre=0, t_post=0, n_trials=None, duration=None, resolution=0.1, FeMax=1, FdMax=1, FcMax=1, FfMax=1, maxrep=None, hardprob=False, confoundorder=3):
+    def __init__(self, TR, P, C, rho, stim_duration, n_stimuli, ITImodel=None, ITImin=None, ITImax=None, ITImean=None, restnum=0, restdur=0, t_pre=0, t_post=0, n_trials=None, duration=None, resolution=0.1, FeMax=1, FdMax=1, FcMax=1, FfMax=1, maxrep=None, hardprob=False, confoundorder=3,hrf_precision = 1):
         self.TR = TR
         self.P = P
         self.C = C
@@ -411,6 +417,10 @@ class experiment(object):
         self.FdMax = FdMax
         self.FcMax = FcMax
         self.FfMax = FfMax
+
+        self.hrf_precision = hrf_precision
+        if not np.isclose(self.hrf_precision/self.resolution,int(self.hrf_precision/self.resolution)):
+            self.hrf_precision = int(self.hrf_precision/self.resolution)*self.resolution
 
         self.countstim()
         self.CreateTsComp()
@@ -494,7 +504,8 @@ class experiment(object):
 
         # contrasts
         # expand contrasts to resolution of HRF (?)
-        self.CX = np.kron(self.C, np.eye(self.laghrf))
+        prec = int(self.laghrf/(self.hrf_precision/self.resolution))
+        self.CX = np.kron(self.C, np.eye(prec))
 
         # drift
         self.S = self.drift(np.arange(0, self.n_scans))  # [tp x 1]

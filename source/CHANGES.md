@@ -1,3 +1,10 @@
+0.1.04 - 08/30/2017
+* add hrf_precision as parameter: not same as resolution
+
+0.1.03 - 08/09/2017
+* remove indentation bugs
+* replace often reoccuring warnings with internal warning
+
 0.1.02 - 07/31/2017
 * debug first ITI (should be 0)
 * debug Hardprob

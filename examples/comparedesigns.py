@@ -13,9 +13,10 @@ EXP = geneticalgorithm.experiment(
     stim_duration=1,
     t_pre=0.5,
     t_post=2,
-    ITImodel = "uniform",
+    ITImodel = "exponential",
     ITImin = 2,
-    ITImax=4
+    ITImax=4,
+    ITImean=2.1
     )
 
 # define first design with a fixed ITI

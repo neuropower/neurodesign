@@ -1,3 +1,6 @@
+0.1.05 - 11/22/2017
+* report: remove bug ndarray check in report
+
 0.1.04 - 08/30/2017
 * add hrf_precision as parameter: not same as resolution
 

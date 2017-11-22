@@ -1,22 +1,16 @@
-FROM ubuntu:14.04
+FROM debian:8
 MAINTAINER Joke Durnez
 
-RUN ln -snf /bin/bash /bin/sh
-ENV SHELL /bin/bash
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
-# Update packages and install the minimal set of tools
-RUN apt-get update && \
-    apt-get dist-upgrade -y && \
-    apt-get install -y build-essential && \
-    apt-get install -y curl git xvfb bzip2 apt-utils && \
-    apt-get install -y libglib2.0-0 && \
-    apt-get install -y libfreetype6-dev libxft-dev
-ENV LANG C.UTF-8
+RUN apt-get update --fix-missing && apt-get install -y wget bzip2 ca-certificates \
+    libglib2.0-0 libxext6 libsm6 libxrender1 \
+    git mercurial subversion
 
-# Install conda
-RUN curl -O https://repo.continuum.io/archive/Anaconda3-4.2.0-Linux-x86_64.sh && \
-    yes "yes" | bash Anaconda3-4.2.0-Linux-x86_64.sh && \
-    sudo -s source ~/.bashrc
+RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
+    wget --quiet https://repo.continuum.io/archive/Anaconda2-5.0.1-Linux-x86_64.sh -O ~/anaconda.sh && \
+    /bin/bash ~/anaconda.sh -b -p /opt/conda && \
+    rm ~/anaconda.sh
 
 RUN conda install nose && \
     conda install numpy && \

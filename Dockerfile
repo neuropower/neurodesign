@@ -15,7 +15,7 @@ RUN pip install reportlab
 RUN pip install progressbar
 RUN pip install seaborn
 
-ENV LD_LIBRARY_PATH=/usr/local/anaconda/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH
 
 # Clear apt cache to reduce image size
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -159,11 +159,11 @@ class design(object):
                 orderli.insert(x, "R")
                 ITIli.insert(x, self.experiment.restdur)
             ITIli = [y+self.experiment.trial_duration  if not x == "R" else y for x, y in zip(orderli, ITIli)]
-            onsets = np.cumsum(ITIli)
+            onsets = np.cumsum(ITIli)-self.experiment.trial_duration
             self.onsets = [y for x, y in zip(orderli, onsets) if not x == "R"]
         else:
             ITIli = np.array(self.ITI) + self.experiment.trial_duration
-            self.onsets = np.cumsum(ITIli)
+            self.onsets = np.cumsum(ITIli) - self.experiment.trial_duration
         stimonsets = [x + self.experiment.t_pre for x in self.onsets]
 
         # round onsets to resolution

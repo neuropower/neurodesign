@@ -71,17 +71,11 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1
 
     elif model == "uniform":
         mean = (min+max)/2.
-        maxdur = mean*(ntrials-1)-0.5
-        success = 0
-        ESd = np.sqrt(((max-min)**2/12.)/(ntrials-1))
-        while success == 0:
-            seed=seed+20
-            np.random.seed(seed)
-            smp = np.random.uniform(min,max,(ntrials-1))
-            smp = np.append([0],smp)
-            smp = [np.floor(x / resolution)* resolution for x in smp]
-            if np.sum(smp)<maxdur and (np.mean(smp)-mean)<ESd:
-                success = 1
+        np.random.seed(seed)
+        smp = np.random.uniform(min,max,(ntrials-1))
+        obsmn = np.mean(smp)
+        smp = smp - (obsmn-mean)
+        smp = np.append([0],smp)
 
     elif model == "exponential":
         if not lam:
@@ -89,17 +83,11 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1
                 lam = compute_lambda(min,max,mean)
             except ValueError as err:
                 raise ValueError(err)
-        ESd = np.sqrt(lam**2/float(ntrials-1))
-        maxdur = mean*(ntrials-1)-0.5
-        success = 0
-        while success == 0:
-            seed = seed+20
-            np.random.seed(seed)
-            smp = rtexp((ntrials-1),lam,min,max,seed=seed)
-            smp = [np.floor(x / resolution)* resolution for x in smp]
-            if np.sum(smp)<maxdur and abs(np.mean(smp)-mean)<(ESd/4.):
-                success = 1
-            smp = np.append([0],smp)
+        np.random.seed(seed)
+        smp = rtexp((ntrials-1),lam,min,max,seed=seed)
+        obsmn = np.mean(smp)
+        smp = smp - (obsmn-mean)
+        smp = np.append([0],smp)
 
     return smp,lam
 
@@ -122,6 +110,6 @@ def difexp(lam,lower,upper,mean):
 def rtexp(ntrials,lam,lower,upper,seed):
     a = float(lower)
     b = float(upper)
-    x = lam
-    smp = stats.truncexpon((b-a)/x,loc=a,scale=x).rvs(ntrials)
+    np.random.seed(seed)
+    smp = stats.truncexpon((b-a)/lam,loc=a,scale=lam).rvs(ntrials)
     return smp

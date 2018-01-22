@@ -87,6 +87,10 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1
         smp = _fix_iti(smp,mean,min,max)
         smp = np.append([0],smp)
 
+    # round to resolution
+    smp = resolution*np.round(smp/resolution)
+
+
     return smp,lam
 
 def _fix_iti(smp,mean,min,max):
@@ -96,6 +100,7 @@ def _fix_iti(smp,mean,min,max):
     # now it changes values either to min/max or with the average difference
     # compute diff
     totaldiff = np.sum(smp) - mean*len(smp)
+    order = np.argsort(np.argsort(smp))
     smp = np.sort(smp)
     smp = smp[::-1] if totaldiff<0 else smp
     border = max if totaldiff < 0 else min
@@ -112,7 +117,10 @@ def _fix_iti(smp,mean,min,max):
         else:
             smp[idx:] = smp[idx:]-pointdiff
             totaldiff = np.sum(smp) - mean*len(smp)
+    # return to original order
+    smp = smp[order]
     return smp
+
 
 def _compute_lambda(lower,upper,mean):
     a = float(lower)

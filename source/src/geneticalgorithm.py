@@ -1,5 +1,5 @@
 from __future__ import division
-from src import msequence, generate#, report
+from neurodesign import msequence, generate, report
 from numpy import transpose as t
 from scipy.special import gamma
 from collections import Counter
@@ -168,28 +168,20 @@ class design(object):
         stimonsets = [x + self.experiment.t_pre for x in self.onsets]
 
         # round onsets to resolution
-        self.ITI = [np.floor(x / self.experiment.resolution)
-                    * self.experiment.resolution for x in self.ITI]
-        onsetX = [np.floor(x / self.experiment.resolution)
-                  * self.experiment.resolution for x in stimonsets]
-        stimonsets = onsetX
+        self.ITI, x = _round_to_resolution(self.ITI,self.experiment.resolution)
+        onsetX, XindStim = _round_to_resolution(stimonsets,self.experiment.resolution)
+        stim_duration_tp = int(
+            self.experiment.stim_duration / self.experiment.resolution)
 
         # find indices in resolution scale of stimuli
-        if np.max(onsetX)>np.max(self.experiment.r_tp):
-            # check !
-            return False
-        XindStim = [int(np.where(self.experiment.r_tp == y)[0])
-                    for y in onsetX]
+        assert(np.max(XindStim) < self.experiment.n_tp)
+        assert(np.max(XindStim)+stim_duration_tp < self.experiment.n_tp)
 
         # create design matrix in resolution scale (=deltasM in Kao toolbox)
         X_X = np.zeros([self.experiment.n_tp, self.experiment.n_stimuli])
-        stim_duration_tp = int(
-            self.experiment.stim_duration / self.experiment.resolution)
+
         for stimulus in xrange(self.experiment.n_stimuli):
             for dur in xrange(stim_duration_tp):
-                if np.max(np.array(XindStim) + dur)>=(X_X.shape[0]):
-                    #tocheck
-                    return False
                 X_X[np.array(XindStim) + dur, int(stimulus)
                     ] = [1 if z == stimulus else 0 for z in self.order]
 
@@ -201,13 +193,10 @@ class design(object):
                 deconvM[j:, self.experiment.laghrf * stim +
                         j] = X_X[:(self.experiment.n_tp - j), stim]
 
-        # downsample to TR and hrf_precision
+        # downsample and whiten deconvM
         idxX = [int(x) for x in np.arange(0, self.experiment.n_tp,
                                          self.experiment.TR / self.experiment.resolution)]
-        idxY = [int(x) for x in np.arange(0, int(self.experiment.laghrf * self.experiment.n_stimuli),
-                                         self.experiment.hrf_precision/self.experiment.resolution)]
         deconvMdown = deconvM[idxX, :]
-        deconvMdown = deconvMdown[:, idxY]
         Xwhite = np.dot(
             np.dot(t(deconvMdown), self.experiment.white), deconvMdown)
 
@@ -389,7 +378,7 @@ class experiment(object):
     def __init__(self, TR, P, C, rho, stim_duration, n_stimuli, ITImodel=None, ITImin=None, ITImax=None, ITImean=None, restnum=0, restdur=0, t_pre=0, t_post=0, n_trials=None, duration=None, resolution=0.1, FeMax=1, FdMax=1, FcMax=1, FfMax=1, maxrep=None, hardprob=False, confoundorder=3):
         self.TR = TR
         self.P = P
-        self.C = C
+        self.C = np.array(C)
         self.rho = rho
         self.n_stimuli = n_stimuli
         self.t_pre = t_pre
@@ -425,7 +414,7 @@ class experiment(object):
         self.countstim()
         self.CreateTsComp()
         self.CreateLmComp()
-        self.max_eff()
+        # self.max_eff()
 
     def max_eff(self):
         '''
@@ -486,9 +475,9 @@ class experiment(object):
         '''
         This function computes the number of scans and timpoints (in seconds and resolution units)
         '''
-        self.n_scans = int(np.floor(self.duration / self.TR))  # number of scans
+        self.n_scans = int(np.ceil(self.duration / self.TR))  # number of scans
         # number of timepoints (in resolution)
-        self.n_tp = int(np.floor(self.duration / self.resolution))
+        self.n_tp = int(np.ceil(self.duration / self.resolution))
         self.r_scans = np.arange(0, self.duration, self.TR)
         self.r_tp = np.arange(0, self.duration, self.resolution)
 
@@ -504,7 +493,7 @@ class experiment(object):
 
         # contrasts
         # expand contrasts to resolution
-        self.CX = np.kron(self.C, np.eye(self.laghrf))
+        self.CX = np.array(np.kron(self.C, np.eye(self.laghrf)))
         assert(self.CX.shape[0]==self.C.shape[0]*self.laghrf)
         assert(self.CX.shape[1]==self.n_stimuli*self.laghrf)
 
@@ -1044,3 +1033,9 @@ def _find_new_resolution(TR,res):
     divisor = sorted[minind][0]
     newres = TR/divisor
     return newres
+
+def _round_to_resolution(inmat,res):
+    out = res*np.floor(np.array(inmat)/res)
+    ind = out/res
+    ind = [int(x) for x in ind]
+    return out, ind

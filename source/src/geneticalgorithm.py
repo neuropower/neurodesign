@@ -1,25 +1,25 @@
-from __future__ import division
-import numpy as np
-from numpy.linalg import inv
-import scipy
-from scipy import linalg
+from src import msequence, generate, report
 from numpy import transpose as t
 from scipy.special import gamma
+from __future__ import division
 from collections import Counter
-import pandas as pd
-from neurodesign import msequence, generate, report
-import itertools
-import scipy.linalg
-import os
-import sys
-import numpy as np
-import zipfile
-import StringIO
-import shutil
-import copy
+from numpy.linalg import inv
+from scipy import linalg
 import sklearn.cluster
-import time
+import scipy.linalg
+import pandas as pd
 import progressbar
+import numpy as np
+import itertools
+import StringIO
+import warnings
+import zipfile
+import shutil
+import scipy
+import copy
+import time
+import sys
+import os
 
 
 class design(object):
@@ -417,6 +417,10 @@ class experiment(object):
         self.FdMax = FdMax
         self.FcMax = FcMax
         self.FfMax = FfMax
+
+        if not self.TR % self.resolution == 0:
+            self.resolution = _find_new_resolution(self.TR,self.resolution)
+            warnings.warn("Warning: the resolution is adjusted to be a multiple of the TR.  New resolution: %f"%self.resolution)
 
         self.hrf_precision = hrf_precision
         if not np.isclose(self.hrf_precision/self.resolution,int(self.hrf_precision/self.resolution)):
@@ -913,79 +917,6 @@ class population(object):
 
         return self
 
-    def print_cmd(self):
-        cm1 = "EXP = geneticalgorithm.experiment( \n" \
-            "    TR = {0}, \n" \
-            "    P = {1}, \n" \
-            "    C = {2}, \n" \
-            "    rho = {3}, \n" \
-            "    n_stimuli = {4}, \n" \
-            "    n_trials = {5}, \n" \
-            "    duration = {6}, \n" \
-            "    resolution = {7}, \n" \
-            "    stim_duration = {8}, \n" \
-            "    t_pre = {9}, \n" \
-            "    t_post = {10}, \n" \
-            "    maxrep = {11}, \n" \
-            "    hardprob = {12}, \n" \
-            "    confoundorder = {13}, \n" \
-            "    ITImodel = '{14}', \n" \
-            "    ITImin = {15}, \n" \
-            "    ITImean = {16}, \n" \
-            "    ITImax = {17}, \n" \
-            "    restnum = {18}, \n" \
-            "    restdur = {19}) \n".format(
-                self.exp.TR,
-                self.exp.P if type(
-                    self.exp.P) == list else self.exp.P.tolist(),
-                self.exp.C if type(
-                    self.exp.C) == list else self.exp.C.tolist(),
-                self.exp.rho,
-                self.exp.n_stimuli,
-                self.exp.n_trials,
-                self.exp.duration,
-                self.exp.resolution,
-                self.exp.stim_duration,
-                self.exp.t_pre,
-                self.exp.t_post,
-                self.exp.maxrep if self.exp.maxrep else 'None',
-                self.exp.hardprob,
-                self.exp.confoundorder,
-                self.exp.ITImodel,
-                self.exp.ITImin,
-                self.exp.ITImean,
-                self.exp.ITImax,
-                self.exp.restnum,
-                self.exp.restdur)
-
-        cm2 = "POP = geneticalgorithm.population( \n" \
-            "    experiment = EXP, \n" \
-            "    G = {0}, \n" \
-            "    R = {1}, \n" \
-            "    q = {2}, \n" \
-            "    weights = {3}, \n" \
-            "    I = {4}, \n" \
-            "    preruncycles = {5}, \n" \
-            "    cycles = {6}, \n" \
-            "    convergence = {7}, \n" \
-            "    seed = {8}, \n" \
-            "    folder = '{9}') \n".format(
-                self.G,
-                self.R,
-                self.q,
-                self.weights if type(
-                    self.weights) == list else self.weights.tolist(),
-                self.I,
-                self.preruncycles,
-                self.cycles,
-                self.convergence,
-                self.seed,
-                "/local/")
-
-        self.cmd = cm1 + "\n\n" + cm2 + "\n"
-
-        return self
-
     def evaluate(self):
         # select designs: best from k-means clusters
         shape = self.bestdesign.Xconv.shape
@@ -1097,3 +1028,24 @@ class population(object):
                 varcov[sig1, sig2] = np.mean(cors)
                 varcov[sig2, sig1] = np.mean(cors)
         return varcov
+
+def _change_resolution(inputmatrix,start=1,goal=0.1):#for example
+    newmat = inputmatrix/goal
+
+def _find_new_resolution(TR,res):
+    n = TR*1000.
+    # find divisors of TR*1000
+    large_divisors = []
+    for i in xrange(1, int(math.sqrt(n) + 1)):
+        if n % i == 0:
+            large_divisors.append(i)
+            if i*i != n:
+                large_divisors.append(int(n / i))
+    sorted = np.sort(large_divisors)
+    # closest to res
+    resdivisor = TR/float(res)
+    difs = np.abs(resdivisor-sorted)
+    minind = np.where(difs==np.min(difs))[0]
+    divisor = sorted[minind][0]
+    newres = TR/divisor
+    return newres

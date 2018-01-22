@@ -1,7 +1,7 @@
-from src import msequence, generate, report
+from __future__ import division
+from src import msequence, generate#, report
 from numpy import transpose as t
 from scipy.special import gamma
-from __future__ import division
 from collections import Counter
 from numpy.linalg import inv
 from scipy import linalg
@@ -18,6 +18,7 @@ import shutil
 import scipy
 import copy
 import time
+import math
 import sys
 import os
 
@@ -382,12 +383,10 @@ class experiment(object):
     :type ITImean: float
     :param ITImax: The max ITI (required with "uniform" or "exponential")
     :type ITImax: float
-    :type hrf_precision: The precision to estimate the hrf (s)
-    :type hrf_precision: float
 
     '''
 
-    def __init__(self, TR, P, C, rho, stim_duration, n_stimuli, ITImodel=None, ITImin=None, ITImax=None, ITImean=None, restnum=0, restdur=0, t_pre=0, t_post=0, n_trials=None, duration=None, resolution=0.1, FeMax=1, FdMax=1, FcMax=1, FfMax=1, maxrep=None, hardprob=False, confoundorder=3,hrf_precision = 1):
+    def __init__(self, TR, P, C, rho, stim_duration, n_stimuli, ITImodel=None, ITImin=None, ITImax=None, ITImean=None, restnum=0, restdur=0, t_pre=0, t_post=0, n_trials=None, duration=None, resolution=0.1, FeMax=1, FdMax=1, FcMax=1, FfMax=1, maxrep=None, hardprob=False, confoundorder=3):
         self.TR = TR
         self.P = P
         self.C = C
@@ -418,13 +417,10 @@ class experiment(object):
         self.FcMax = FcMax
         self.FfMax = FfMax
 
-        if not self.TR % self.resolution == 0:
+        # make sure resolution is a divisor of TR (up to )
+        if not np.isclose(self.TR % self.resolution, 0):
             self.resolution = _find_new_resolution(self.TR,self.resolution)
             warnings.warn("Warning: the resolution is adjusted to be a multiple of the TR.  New resolution: %f"%self.resolution)
-
-        self.hrf_precision = hrf_precision
-        if not np.isclose(self.hrf_precision/self.resolution,int(self.hrf_precision/self.resolution)):
-            self.hrf_precision = int(self.hrf_precision/self.resolution)*self.resolution
 
         self.countstim()
         self.CreateTsComp()
@@ -490,9 +486,9 @@ class experiment(object):
         '''
         This function computes the number of scans and timpoints (in seconds and resolution units)
         '''
-        self.n_scans = int(np.ceil(self.duration / self.TR))  # number of scans
+        self.n_scans = int(np.floor(self.duration / self.TR))  # number of scans
         # number of timepoints (in resolution)
-        self.n_tp = int(np.ceil(self.duration / self.resolution))
+        self.n_tp = int(np.floor(self.duration / self.resolution))
         self.r_scans = np.arange(0, self.duration, self.TR)
         self.r_tp = np.arange(0, self.duration, self.resolution)
 
@@ -504,23 +500,26 @@ class experiment(object):
         '''
 
         # hrf
-        self.canonical(0.1)
+        self.canonical()
 
         # contrasts
-        # expand contrasts to resolution of HRF (?)
-        prec = int(self.laghrf/(self.hrf_precision/self.resolution))
-        self.CX = np.kron(self.C, np.eye(prec))
+        # expand contrasts to resolution
+        self.CX = np.kron(self.C, np.eye(self.laghrf))
+        assert(self.CX.shape[0]==self.C.shape[0]*self.laghrf)
+        assert(self.CX.shape[1]==self.n_stimuli*self.laghrf)
 
         # drift
         self.S = self.drift(np.arange(0, self.n_scans))  # [tp x 1]
+        assert(self.S.shape==(3,self.n_scans))
         self.S = np.matrix(self.S)
 
         # square of the whitening matrix
         base = [1 + self.rho**2, -1 * self.rho] + [0] * (self.n_scans - 2)
         self.V2 = scipy.linalg.toeplitz(base)
+        # set first and last to 1
         self.V2[0, 0] = 1
-        self.V2 = np.matrix(self.V2)
         self.V2[self.n_scans - 1, self.n_scans - 1] = 1
+        self.V2 = np.matrix(self.V2)
 
         self.white = self.V2 - self.V2 * \
             t(self.S) * np.linalg.pinv(self.S *
@@ -528,7 +527,7 @@ class experiment(object):
 
         return self
 
-    def canonical(self, resolution):
+    def canonical(self):
         '''
         This function generates the canonical hrf
 
@@ -537,21 +536,17 @@ class experiment(object):
         '''
         # translated from spm_hrf
         p = [6, 16, 1, 1, 6, 0, 32]
-        dt = resolution / 16.
-        s = np.array(xrange(int(p[6] / dt + 1)))
-        # HRF sampled at 0.1 s
+        dt = self.resolution
+        s = np.array(xrange(int(np.ceil(p[6] / dt))))
+        # HRF sampled at resolution
         hrf = self.spm_Gpdf(s, p[0] / p[2], dt / p[2]) - \
             self.spm_Gpdf(s, p[1] / p[3], dt / p[3]) / p[4]
-        hrf = hrf[[int(x) for x in np.array(
-            xrange(int(p[6] / resolution + 1))) * 16.]]
-        self.hrf = hrf / np.sum(hrf)
-        # HRF sampled at resolution
-        self.basishrf = self.hrf[[int(x) for x in np.arange(
-            0, len(self.hrf) - 1, self.resolution * 10)]]
-        # duration of the HRF
-        self.durhrf = 32.0
+        self.basishrf = hrf / np.sum(hrf)
+        s# duration of the HRF
+        self.durhrf = p[6]
         # length of the HRF parameters in resolution scale
         self.laghrf = int(np.ceil(self.durhrf / self.resolution))
+        assert(self.laghrf == len(s))
 
         return self
 

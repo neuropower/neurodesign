@@ -1,3 +1,10 @@
+0.1.06 - 01/22/2018
+* debug conda matplotlib
+* remove shift in onsets
+* ensure ITI is nominal value
+* improve handling of resolution
+* improve handling of hrf (resolution)
+
 0.1.05 - 11/22/2017
 * report: remove bug ndarray check in report
 

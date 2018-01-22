@@ -34,6 +34,7 @@ DES.FCalc(weights=[0,0.5,0.25,0.25])
 DES.FdCalc()
 DES.FcCalc()
 DES.FfCalc()
+DES.FeCalc()
 
 # define second design
 

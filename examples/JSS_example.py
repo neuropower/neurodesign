@@ -44,8 +44,8 @@ print(DES4.order)
 POP = geneticalgorithm.population(
     experiment=EXP,
     weights=[0,0.5,0.25,0.25],
-    preruncycles = 10000,
-    cycles = 10000,
+    preruncycles = 10,
+    cycles = 100,
     folder = "./",
     seed=100
     )

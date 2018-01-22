@@ -7,7 +7,7 @@ EXP = geneticalgorithm.experiment(
     C = [[1,0,0],[0,1,0],[0,0,1],[1,-1,0],[0,1,-1]],
     n_stimuli = 3,
     rho = 0.3,
-    resolution=1,
+    resolution=0.1,
     stim_duration=1,
     t_pre = 0,
     t_post = 2,
@@ -36,7 +36,6 @@ POP = geneticalgorithm.population(
 POP.naturalselection()
 POP.download()
 POP.evaluate()
-POP.print_cmd()
 
 ################
 # step by step #

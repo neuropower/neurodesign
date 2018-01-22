@@ -73,41 +73,64 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1
         mean = (min+max)/2.
         np.random.seed(seed)
         smp = np.random.uniform(min,max,(ntrials-1))
-        obsmn = np.mean(smp)
-        smp = smp - (obsmn-mean)
+        smp = _fix_iti(smp,mean,min,max)
         smp = np.append([0],smp)
 
     elif model == "exponential":
         if not lam:
             try:
-                lam = compute_lambda(min,max,mean)
+                lam = _compute_lambda(min,max,mean)
             except ValueError as err:
                 raise ValueError(err)
         np.random.seed(seed)
-        smp = rtexp((ntrials-1),lam,min,max,seed=seed)
-        obsmn = np.mean(smp)
-        smp = smp - (obsmn-mean)
+        smp = _rtexp((ntrials-1),lam,min,max,seed=seed)
+        smp = _fix_iti(smp,mean,min,max)
         smp = np.append([0],smp)
 
     return smp,lam
 
-def compute_lambda(lower,upper,mean):
+def _fix_iti(smp,mean,min,max):
+    # kind of a weird function to fix ITI's to have the nominal mean
+    # problem was that you can't just add or subtract the difference: it could be
+    # out of bounds of the minimum and the maximum...
+    # now it changes values either to min/max or with the average difference
+    # compute diff
+    totaldiff = np.sum(smp) - mean*len(smp)
+    smp = np.sort(smp)
+    smp = smp[::-1] if totaldiff<0 else smp
+    border = max if totaldiff < 0 else min
+    pointdiff = totaldiff/len(smp)
+    idx = 0
+    while not np.isclose(totaldiff,0):
+        sm = smp[idx]
+        thisdiff = sm - border
+        if np.abs(thisdiff) < np.abs(pointdiff):
+            smp[idx] = sm-thisdiff
+            totaldiff = totaldiff - thisdiff
+            pointdiff = totaldiff / (len(smp)-idx-1)
+            idx += 1
+        else:
+            smp[idx:] = smp[idx:]-pointdiff
+            totaldiff = np.sum(smp) - mean*len(smp)
+    return smp
+
+def _compute_lambda(lower,upper,mean):
     a = float(lower)
     b = float(upper)
     m = float(mean)
-    opt = scipy.optimize.minimize(difexp,50,args=(a,b,m),bounds=((10**(-9),100),),method="L-BFGS-B")
-    check = rtexp(100000,opt.x[0],lower,upper,seed=1000)
+    opt = scipy.optimize.minimize(_difexp,50,args=(a,b,m),bounds=((10**(-9),100),),method="L-BFGS-B")
+    check = _rtexp(100000,opt.x[0],lower,upper,seed=1000)
     if not np.isclose(np.mean(check),mean,rtol=0.1):
         raise ValueError("Error when figuring out lambda for exponential distribution: can't compute lambda.")
         return o
     else:
         return opt.x[0]
 
-def difexp(lam,lower,upper,mean):
+def _difexp(lam,lower,upper,mean):
     diff = stats.truncexpon((float(upper)-float(lower))/float(lam),loc=float(lower),scale=float(lam)).mean()-float(mean)
     return abs(diff)
 
-def rtexp(ntrials,lam,lower,upper,seed):
+def _rtexp(ntrials,lam,lower,upper,seed):
     a = float(lower)
     b = float(upper)
     np.random.seed(seed)

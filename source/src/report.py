@@ -1,23 +1,24 @@
-import time
-from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image,Table,PageBreak, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import inch
 from reportlab.lib.utils import ImageReader
-import sklearn.cluster
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import cStringIO
-import seaborn
-from pdfrw import PdfReader
-import numpy as np
+from reportlab.lib.pagesizes import letter
 import matplotlib.gridspec as gridspec
 from pdfrw import PdfReader, PdfDict
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
+from reportlab.lib.units import inch
+import matplotlib.pyplot as plt
+from pdfrw import PdfReader
+import sklearn.cluster
 import neurodesign
+import numpy as np
+import matplotlib
+import cStringIO
+import seaborn
+import time
 import os
+
+matplotlib.use('Agg')
 
 def make_report(POP,outfile="NeuroDesign.pdf"):
     '''

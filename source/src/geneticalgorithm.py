@@ -414,7 +414,7 @@ class experiment(object):
         self.countstim()
         self.CreateTsComp()
         self.CreateLmComp()
-        # self.max_eff()
+        self.max_eff()
 
     def max_eff(self):
         '''
@@ -699,7 +699,7 @@ class population(object):
 
             order = generate.order(self.exp.n_stimuli, self.exp.n_trials,
                                    self.exp.P, ordertype=ordertype, seed=self.seed)
-            ITI,ITIlam = generate.iti(ntrials=self.exp.n_trials, model=self.exp.ITImodel, min=self.exp.ITImin, max=(self.exp.ITImax+self.exp.resolution), mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed,resolution=self.exp.resolution)
+            ITI,ITIlam = generate.iti(ntrials=self.exp.n_trials, model=self.exp.ITImodel, min=self.exp.ITImin, max=self.exp.ITImax, mean=self.exp.ITImean, lam=self.exp.ITIlam, seed=self.seed,resolution=self.exp.resolution)
 
             if ITIlam:
                 self.exp.ITIlam = ITIlam

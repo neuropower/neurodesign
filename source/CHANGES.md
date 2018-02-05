@@ -1,3 +1,6 @@
+0.1.07 - 02/05/2018
+* added option for random design generation
+
 0.1.06 - 01/22/2018
 * debug conda matplotlib
 * remove shift in onsets

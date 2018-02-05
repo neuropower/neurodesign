@@ -593,9 +593,11 @@ class population(object):
     :type folder: string
     :param outdes: number of designs to be saved
     :type outdes: integer
+    :param optimisation: The type of optimisation - 'GA' or 'random'
+    :type optimisation: string
     '''
 
-    def __init__(self, experiment, weights, preruncycles, cycles, seed=None, I=4, G=20, R=[0.4, 0.4, 0.2], q=0.01, Aoptimality=True, folder=None, outdes=3, convergence=1000):
+    def __init__(self, experiment, weights, preruncycles, cycles, seed=None, I=4, G=20, R=[0.4, 0.4, 0.2], q=0.01, Aoptimality=True, folder=None, outdes=3, convergence=1000,optimisation='GA'):
 
         self.exp = experiment
         self.G = G
@@ -609,6 +611,7 @@ class population(object):
         self.Aoptimality = Aoptimality
         self.outdes = outdes
         self.folder = folder
+        self.optimisation = optimisation
         if seed:
             self.seed = seed
         else:
@@ -715,17 +718,7 @@ class population(object):
 
         return self
 
-    def to_next_generation(self, weights=None, seed=1234):
-        '''
-        This function goes from one generation to the next.
-
-        :param weights: weights for efficiency calculation.
-        :type weights: list of floats, summing to 1
-        :param seed: The seed for random processes.
-        :type seed: integer or None
-        '''
-
-        # remove duplicates and replace by random designs
+    def _clean_designs(self,weights,seed):
         n = 0
         rm = 0
         while n == 0:
@@ -747,6 +740,9 @@ class population(object):
 
         self.add_new_designs(R=[0, rm, 0], weights=weights)
 
+        return self
+
+    def _mutation(self,weights,seed):
         # Mutation:
         # if: Best design: stay untouched
         # elif Correlation between all is > 0.8: mutate with 20% mutations
@@ -778,11 +774,9 @@ class population(object):
             else:
                 self.designs[idx] = offspring
 
-        # weights
-        if weights == None:
-            weights = self.weights
+        return self
 
-        # crossover
+    def _crossover(self,weights,seed):
         # select designs with F>median(F):
         efficiencies = [x.F for x in self.designs]
         #crossind = [ind for ind,val in enumerate(efficiencies) if val >= np.median(efficiencies)]
@@ -811,10 +805,46 @@ class population(object):
                     self.designs.append(baby)
                     count = count + 1
 
-        # immigration
-        noim = self.I
+        return self
+
+    def _immigration(self,weights,noim):
         R = np.ceil(np.array(self.R) * noim).tolist()
         self.add_new_designs(R=R, weights=weights)
+
+        return self
+
+    def to_next_generation(self, weights=None, seed=1234,optimisation=None):
+        '''
+        This function goes from one generation to the next.
+
+        :param weights: weights for efficiency calculation.
+        :type weights: list of floats, summing to 1
+        :param seed: The seed for random processes.
+        :type seed: integer or None
+        :param optimisation: The type of optimisation - 'GA' or 'random'
+        :type optimisation: string
+        '''
+
+        if optimisation == None:
+            optimisation = self.optimisation
+
+        # weights
+        if weights == None:
+            weights = self.weights
+
+        self._clean_designs(weights,seed)
+
+        # remove duplicates and replace by random designs
+        if optimisation == 'GA':
+            self._mutation(weights,seed)
+            self._crossover(weights,seed)
+            self._immigration(weights,noim=self.I)
+
+        elif optimisation == 'random':
+            self._immigration(weights,noim=self.I)
+
+        else:
+            print("Unknown optimisation type")
 
         # inspect efficiencies
         efficiencies = [x.F for x in self.designs]
@@ -858,7 +888,7 @@ class population(object):
 
         return self
 
-    def naturalselection(self):
+    def naturalselection(self,optimisation='GA'):
         '''
         Function to run natural selection for design optimization
         '''

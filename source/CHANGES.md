@@ -1,3 +1,6 @@
+0.1.08-12 - 02/06/2018
+* fix on matplotlib bug
+
 0.1.08-11 - 02/06/2018
 * fix on duration bug
 

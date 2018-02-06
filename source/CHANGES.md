@@ -1,8 +1,5 @@
-0.1.08 - 02/06/2018
+0.1.08-10 - 02/06/2018
 * fix on duration bug
-
-0.1.08 - 02/05/2018
-* quick fix on duration bug
 
 0.1.07 - 02/05/2018
 * added option for random design generation

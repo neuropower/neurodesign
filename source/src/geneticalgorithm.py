@@ -176,7 +176,7 @@ class design(object):
         # find indices in resolution scale of stimuli
         assert(np.max(XindStim) <= self.experiment.n_tp)
         if np.max(XindStim)+stim_duration_tp <= self.experiment.n_tp:
-            if np.isclose(np.max(XindStim)+stim_duration_tp,self.experiment.n_tp):
+            if np.isclose(np.max(XindStim)+stim_duration_tp,self.experiment.n_tp,5):
                 return False
             else:
                 assert(np.max(XindStim)+stim_duration_tp <= self.experiment.n_tp)

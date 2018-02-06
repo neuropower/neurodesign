@@ -18,7 +18,7 @@ import seaborn
 import time
 import os
 
-matplotlib.use('Agg')
+plt.switch_backend('agg')
 
 def make_report(POP,outfile="NeuroDesign.pdf"):
     '''

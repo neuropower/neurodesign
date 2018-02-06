@@ -8,7 +8,7 @@ RUN conda install numpy && \
     conda install pandas && \
     conda install matplotlib
 
-RUN pip install neurodesign > 0.1.6
+RUN pip install neurodesign > 0.1.8
 RUN pip install sklearn
 RUN pip install pdfrw
 RUN pip install reportlab
@@ -18,4 +18,6 @@ RUN pip install seaborn
 ENV LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH
 
 # Clear apt cache to reduce image size
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get update && \
+    apt-get install -y libgl1-mesa-glx && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -68,12 +68,13 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1
 
     if model == "fixed":
         smp = [0]+[mean]*(ntrials-1)
+        smp = resolution*np.round(smp/resolution)
 
     elif model == "uniform":
         mean = (min+max)/2.
         np.random.seed(seed)
         smp = np.random.uniform(min,max,(ntrials-1))
-        smp = _fix_iti(smp,mean,min,max)
+        smp = _fix_iti(smp,mean,min,max,resolution)
         smp = np.append([0],smp)
 
     elif model == "exponential":
@@ -84,43 +85,29 @@ def iti(ntrials,model,min=None,mean=None,max=None,lam=None,resolution=0.1,seed=1
                 raise ValueError(err)
         np.random.seed(seed)
         smp = _rtexp((ntrials-1),lam,min,max,seed=seed)
-        smp = _fix_iti(smp,mean,min,max)
+        smp = _fix_iti(smp,mean,min,max,resolution)
         smp = np.append([0],smp)
 
     # round to resolution
-    smp = resolution*np.round(smp/resolution)
-
 
     return smp,lam
 
-def _fix_iti(smp,mean,min,max):
+def _fix_iti(smp,mean,min,max,resolution):
     # kind of a weird function to fix ITI's to have the nominal mean
     # problem was that you can't just add or subtract the difference: it could be
     # out of bounds of the minimum and the maximum...
     # now it changes values either to min/max or with the average difference
     # compute diff
+    smp = resolution*np.round(smp/resolution)
     totaldiff = np.sum(smp) - mean*len(smp)
-    order = np.argsort(np.argsort(smp))
-    smp = np.sort(smp)
-    smp = smp[::-1] if totaldiff<0 else smp
-    border = max if totaldiff < 0 else min
-    pointdiff = totaldiff/len(smp)
-    idx = 0
-    while not np.isclose(totaldiff,0):
-        sm = smp[idx]
-        thisdiff = sm - border
-        if np.abs(thisdiff) < np.abs(pointdiff):
-            smp[idx] = sm-thisdiff
-            totaldiff = totaldiff - thisdiff
-            pointdiff = totaldiff / (len(smp)-idx-1)
-            idx += 1
+    while not np.isclose(totaldiff,0,resolution) and np.mean(smp)>mean:
+        chid = np.random.choice(len(smp))
+        if (smp[chid]-min)<resolution or (max-smp[chid])<resolution:
+             continue
         else:
-            smp[idx:] = smp[idx:]-pointdiff
-            totaldiff = np.sum(smp) - mean*len(smp)
-    # return to original order
-    smp = smp[order]
+             smp[chid] = smp[chid]-np.sign(totaldiff)*resolution
+        totaldiff = np.sum(smp) - mean*len(smp)
     return smp
-
 
 def _compute_lambda(lower,upper,mean):
     a = float(lower)

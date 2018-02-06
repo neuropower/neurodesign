@@ -1,3 +1,6 @@
+0.1.08 - 02/06/2018
+* fix on duration bug
+
 0.1.08 - 02/05/2018
 * quick fix on duration bug
 

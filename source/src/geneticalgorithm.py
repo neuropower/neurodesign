@@ -175,7 +175,11 @@ class design(object):
 
         # find indices in resolution scale of stimuli
         assert(np.max(XindStim) <= self.experiment.n_tp)
-        assert(np.max(XindStim)+stim_duration_tp <= self.experiment.n_tp)
+        if np.max(XindStim)+stim_duration_tp <= self.experiment.n_tp:
+            if np.isclose(np.max(XindStim)+stim_duration_tp,self.experiment.n_tp):
+                return False
+            else:
+                assert(np.max(XindStim)+stim_duration_tp <= self.experiment.n_tp)
 
         # create design matrix in resolution scale (=deltasM in Kao toolbox)
         X_X = np.zeros([self.experiment.n_tp, self.experiment.n_stimuli])

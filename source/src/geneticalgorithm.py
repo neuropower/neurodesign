@@ -896,7 +896,7 @@ class population(object):
         if (self.exp.FcMax == 1 and self.exp.FfMax == 1):
             self.exp.max_eff()
 
-        if self.weights[0] > 0:
+        if self.exp.FeMax == 1 and self.weights[0] > 0:
             # add new designs
             self.clear()
             self.add_new_designs(weights=[1, 0, 0, 0])
@@ -908,7 +908,7 @@ class population(object):
                     continue
             self.exp.FeMax = np.max(self.bestdesign.F)
 
-        if self.weights[1] > 0:
+        if self.exp.FdMax == 1 and self.weights[1] > 0:
             self.clear()
             self.add_new_designs(weights=[0, 1, 0, 0])
             # loop

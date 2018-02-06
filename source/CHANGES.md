@@ -1,4 +1,7 @@
-0.1.08-12 - 02/06/2018
+0.1.13 - 02/06/2018
+* fix on not doing FdMax and FeMax if not necessary
+
+0.1.12 - 02/06/2018
 * fix on matplotlib bug
 
 0.1.08-11 - 02/06/2018

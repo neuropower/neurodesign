@@ -1,9 +1,10 @@
-from neurodesign import geneticalgorithm, generate,msequence
+import neurodesign
+from neurodesign import generate
 import numpy as np
 
 # define experimental setup
 
-EXP = geneticalgorithm.experiment(
+EXP = neurodesign.experiment(
     TR=2,
     n_trials=20,
     P = [0.3,0.3,0.4],
@@ -21,7 +22,7 @@ EXP = geneticalgorithm.experiment(
 
 # define first design with a fixed ITI
 
-DES = geneticalgorithm.design(
+DES = neurodesign.design(
     order = [0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1],
     ITI = [2]*20,
     experiment=EXP
@@ -38,7 +39,7 @@ DES.FeCalc()
 
 # define second design
 
-DES2 = geneticalgorithm.design(
+DES2 = neurodesign.design(
     order = [0,0,1,1,2,2,0,0,1,1,2,2,0,0,1,1,2,2,0,1],
     ITI = generate.iti(20,"exponential",min=1,mean=2,max=4,seed=1234)[0],
     experiment=EXP)

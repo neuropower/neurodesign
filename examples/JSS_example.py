@@ -1,5 +1,6 @@
-from neurodesign import geneticalgorithm
-EXP = geneticalgorithm.experiment(
+import neurodesign
+
+EXP = neurodesign.experiment(
  TR=1.2,
  n_trials=20,
  P = [0.3,0.3,0.4],
@@ -12,7 +13,7 @@ EXP = geneticalgorithm.experiment(
  ITImax=4
  )
 
-DES1 = geneticalgorithm.design(
+DES1 = neurodesign.design(
   order = [0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1,2,0,1],
   ITI = [2]*20,
   experiment = EXP
@@ -26,7 +27,7 @@ import matplotlib.pyplot as plt
 plt.plot(DES1.Xconv)
 plt.savefig("output/example_figure_1.pdf",format="pdf")
 
-DES2 = geneticalgorithm.design(
+DES2 = neurodesign.design(
     order = [0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1],
     ITI = [2]*20,
     experiment=EXP
@@ -41,7 +42,7 @@ DES3,DES4 = DES1.crossover(DES2,seed=2000)
 print(DES3.order)
 print(DES4.order)
 
-POP = geneticalgorithm.population(
+POP = neurodesign.optimisation(
     experiment=EXP,
     weights=[0,0.5,0.25,0.25],
     preruncycles = 10,
@@ -49,4 +50,4 @@ POP = geneticalgorithm.population(
     folder = "./",
     seed=100
     )
-POP.naturalselection()
+POP.optimise()

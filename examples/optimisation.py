@@ -1,6 +1,6 @@
-from neurodesign import geneticalgorithm, generate,msequence,report
+from neurodesign import experiment, optimisation, generate,msequence,report
 
-EXP = geneticalgorithm.experiment(
+EXP = experiment(
     TR=2,
     n_trials=100,
     P = [0.33,0.33,0.33],
@@ -19,21 +19,21 @@ EXP = geneticalgorithm.experiment(
     ITImax=4
     )
 
-POP = geneticalgorithm.population(
+POP = optimisation(
     experiment=EXP,
     weights=[0,0.5,0.25,0.25],
-    preruncycles = 20,
-    cycles = 20,
+    preruncycles = 10,
+    cycles = 10,
     seed=1,
     outdes=5,
-    folder='/Users/Joke/Documents/Onderzoek/ProjectsOngoing/Neuropower/playground/design'
+    folder='/Users/Joke/'
     )
 
 #########################
 # run natural selection #
 #########################
 
-POP.naturalselection()
+POP.optimise()
 POP.download()
 POP.evaluate()
 

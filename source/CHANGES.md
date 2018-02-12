@@ -1,3 +1,8 @@
+0.2.00 - 02/09/2018
+* change names to reflect new options
+* update examples
+* reflects JSS submission
+
 0.1.13 - 02/06/2018
 * fix on not doing FdMax and FeMax if not necessary
 

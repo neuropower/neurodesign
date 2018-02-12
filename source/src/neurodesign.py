@@ -819,7 +819,7 @@ class optimisation(object):
         :type weights: list of floats, summing to 1
         :param seed: The seed for random processes.
         :type seed: integer or None
-        :param optimisation: The type of optimisation - 'GA' or 'random'
+        :param optimisation: The type of optimisation - 'GA' or 'simulation'
         :type optimisation: string
         '''
 
@@ -838,7 +838,7 @@ class optimisation(object):
             self._crossover(weights,seed)
             self._immigration(weights,noim=self.I)
 
-        elif optimisation == 'random':
+        elif optimisation == 'simulation':
             self._immigration(weights,noim=self.I)
 
         else:
@@ -886,9 +886,9 @@ class optimisation(object):
 
         return self
 
-    def naturalselection(self,optimisation='GA'):
+    def optimise(self,optimisation='GA'):
         '''
-        Function to run natural selection for design optimization
+        Function to run design optimization
         '''
 
         if (self.exp.FcMax == 1 and self.exp.FfMax == 1):

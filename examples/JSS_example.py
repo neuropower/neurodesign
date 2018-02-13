@@ -42,6 +42,35 @@ DES3,DES4 = DES1.crossover(DES2,seed=2000)
 print(DES3.order)
 print(DES4.order)
 
+from collections import Counter
+order = neurodesign.generate.order(
+    nstim = 4,
+    ntrials = 100,
+    probabilities = [0.25,0.25,0.25,0.25],
+    ordertype = 'random',
+    seed=1234
+)
+print(order[:10])
+Counter(order)
+
+iti,lam = neurodesign.generate.iti(
+    ntrials = 40,
+    model = 'exponential',
+    min = 2,
+    mean = 3,
+    max = 8,
+    resolution = 0.1,
+    seed=2134
+)
+
+print(iti[:10])
+print("mean ITI: %s \n\
+      min ITI: %s \n\
+      max ITI: %s"%(
+          round(sum(iti)/len(iti),2),
+          round(min(iti),2),
+          round(max(iti),2)))
+
 POP = neurodesign.optimisation(
     experiment=EXP,
     weights=[0,0.5,0.25,0.25],

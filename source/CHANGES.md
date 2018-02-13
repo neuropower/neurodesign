@@ -1,3 +1,6 @@
+0.2.01 - 02/09/2018
+* bug in report.py
+
 0.2.00 - 02/09/2018
 * change names to reflect new options
 * update examples

@@ -4,7 +4,7 @@
 Base module variables
 """
 
-__version__ = '0.2.00'
+__version__ = '0.2.01'
 __author__ = 'Joke Durnez'
 __license__ = 'MIT'
 __email__ = 'joke.durnez@gmail.com'

@@ -16,6 +16,7 @@ import matplotlib
 import cStringIO
 import seaborn
 import time
+import sys
 import os
 
 plt.switch_backend('agg')
@@ -34,7 +35,9 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
                             topMargin=40,bottomMargin=18)
 
     Story=[]
-    logofile = os.path.join(neurodesign.__path__[0],"media/NeuroDes.png")
+    curpath = os.path.dirname(unicode(__file__, encoding = sys.getfilesystemencoding()))
+
+    logofile = os.path.join(curpath,"media/NeuroDes.png")
     im = Image(logofile, 1*inch, 1.25*inch)
     Story.append(im)
     Story.append(Spacer(1, 12))

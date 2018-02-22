@@ -16,6 +16,7 @@ from neurodesign import optimisation,experiment
 import matplotlib.pyplot as plt
 from scipy.stats import t
 import seaborn as sns
+import pandas as pd
 import numpy as np
 
 get_ipython().magic(u'matplotlib inline')
@@ -92,7 +93,7 @@ POP_RN = optimisation(
     weights=[0,0.5,0.25,0.25],
     preruncycles = 2,
     cycles = cycles,
-    seed=1,
+    seed=100,
     outdes=5,
     I=50,
     G=10,
@@ -121,7 +122,7 @@ plt.legend()
 plt.savefig("output/test_scores.pdf")
 
 
-# Below, we repeat the random design generator, but we search only one design and one generation.  As such, this is a random design.
+# Below, we repeat the random design generator, but we search only 100 designs and one generation.  As such, this is a random design.
 
 # In[9]:
 
@@ -133,7 +134,7 @@ POP_JO = optimisation(
     cycles = 1,
     seed=1,
     outdes=5,
-    G=2,
+    G=100,
     folder='/tmp/',
     optimisation='simulation'
     )
@@ -142,17 +143,29 @@ POP_JO.optimise()
 
 # In[10]:
 
-print("Optimisation score - random: %s \nOptimisation score - genetic algorithm: %s \nOptimisation score - simulation: %s"%(POP_RN.optima[::-1][0],
-    POP_GA.optima[::-1][0],
-    POP_JO.optima[::-1][0]))
+#collect scores and take average
+scores = [x.F for x in POP_JO.designs]
+
+median_idx = np.where(scores == np.median(scores))[0][0]
+rnd_median = POP_JO.designs[median_idx]
+
+# get PI
+BTI_l = np.percentile(scores,5)
+BTI_u = np.percentile(scores,95)
+
+
+# In[11]:
+
+print("Optimisation score - random: %s \nOptimisation score - genetic algorithm: %s \nOptimisation score - simulation (90 percent PI): %s-%s"%(POP_RN.optima[::-1][0],
+    POP_GA.optima[::-1][0],BTI_l,BTI_u))
 
 
 # Let's look at the resulting experimental designs.
 
-# In[11]:
+# In[12]:
 
-des = np.array([POP_GA.bestdesign.Xconv,POP_RN.bestdesign.Xconv,POP_JO.designs[0].Xconv])
-labels = ['Genetic Algorithm','Simulation','Single']
+des = np.array([POP_GA.bestdesign.Xconv,POP_RN.bestdesign.Xconv,rnd_median.Xconv])
+labels = ['Genetic Algorithm','Simulation','Median random design']
 plt.figure(figsize=(10,7))
 for ind,label in enumerate(labels):
     plt.subplot(3,1,ind+1)
@@ -163,39 +176,45 @@ for ind,label in enumerate(labels):
 plt.savefig("output/designs.pdf")
 
 
+# In[13]:
+
+des = np.array([POP_GA.bestdesign.Xconv,POP_RN.bestdesign.Xconv]+[x.Xconv for x in POP_JO.designs])
+
+
 # ## Simulate data
 # 
-# We continue with the best designs from the two algorithms and the random design.  Below, we simulate data in one voxel that is significantly related to the task.   We assume beta values of (0.5, 0, -0.5).  As such, the two contrast for the main effect represents a Cohen's D of 0.5, while the (1,0,-1) contrast results in a Cohen's D of 1.0.
+# We continue with the best designs from the two algorithms and the random design.  Below, we simulate data in one voxel that is significantly related to the task.   We assume beta values of (0.5, 0, -0.5).
 
-# In[12]:
+# In[ ]:
 
 # create datatables 
 tp = des.shape[1]
-Y = np.zeros([tp,sims,des.shape[2]])
+Y = np.zeros([tp,sims,des.shape[0]])
 
 for i in range(sims):
     rnd = np.random.normal(0,1,tp)
-    for lb in range(3):
+    for lb in range(Y.shape[2]):
         Y[:,i,lb] = np.dot(des[lb,:,:],np.array([0.5,0,-0.5]))+rnd
 
 
 # We analyse the data using `R` below.
 
-# In[13]:
+# In[ ]:
 
-get_ipython().run_cell_magic(u'R', u'-i des,Y,sims -o tvals_main,tvals_diff', u'tvals_main <- array(NA,dim=c(sims,3))\ntvals_diff <- array(NA,dim=c(sims,3))\nfor (method in 1:3){\n    for (sim in 1:sims){\n       dif <- des[method,,1]-des[method,,2]\n        fit <- lm(Y[,sim,method]~des[method,,])\n        tvals_main[sim,method] <- summary(fit)$coef[2,3]\n        fit <- lm(Y[,sim,method]~dif)\n        tvals_diff[sim,method] <- summary(fit)$coef[2,3]\n   }\n}')
+get_ipython().run_cell_magic(u'R', u'-i des,Y,sims -o tvals_main,tvals_diff', u'tvals_main <- array(NA,dim=c(sims,dim(Y)[3]))\ntvals_diff <- array(NA,dim=c(sims,dim(Y)[3]))\nfor (method in 1:dim(Y)[3]){\n    for (sim in 1:sims){\n       dif <- des[method,,1]-des[method,,2]\n        fit <- lm(Y[,sim,method]~des[method,,])\n        tvals_main[sim,method] <- summary(fit)$coef[2,3]\n        fit <- lm(Y[,sim,method]~dif)\n        tvals_diff[sim,method] <- summary(fit)$coef[2,3]\n   }\n}')
 
 
 # This is what the distributions for the two contrasts look like.
 
-# In[14]:
+# In[ ]:
 
 nms = ['Main effect','Contrast effect']
-plt.figure(figsize=(10,5))
+plt.figure(figsize=(18,4))
+dists = [0,1,median_idx]
 for idx,tv in enumerate([tvals_main,tvals_diff]):
     plt.subplot(1,2,idx+1)
     for idy,method in enumerate(labels):
-        sns.distplot(tv[:,idy],label=method)
+        sns.distplot(tv[:,dists[idy]],label=method)
     plt.title(nms[idx])
 plt.legend()
 plt.savefig("output/distributions.pdf")
@@ -203,13 +222,21 @@ plt.savefig("output/distributions.pdf")
 
 # ## Observed power
 
-# In[15]:
+# In[ ]:
 
 # We're assuming a single threshold on a single test, a representative simplification.
 threshold = t.ppf(0.95,des.shape[1]-2)
 nms = ['main effect','contrast effect']
+out = {label:[] for label in labels}
 for idx,tv in enumerate([tvals_main,tvals_diff]):
     for idy,method in enumerate(labels):
-        power = np.mean(tv[:,idy]>threshold)
-        print("The power for the %s with %s: %f"%(nms[idx],method,power))
+        if idy < 2:
+            power = np.mean(tv[:,idy]>threshold)
+            out[method].append(power)
+            print("The power for the %s with %s: %f"%(nms[idx],method,power))
+        else:
+            powers = [np.mean(tv[:,k]>threshold) for k in range(2,tv.shape[1])]
+            out[method].append(powers)
+            print("The 90 percent PI for the %s with a randomly drawn design: %f-%f"%(nms[idx],
+                  np.percentile(powers,5),np.percentile(powers,95)))
 

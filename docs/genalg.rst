@@ -4,9 +4,9 @@ Neurodesign documentation
 .. toctree::
    :maxdepth: 4
 
-Geneticalgorithm: design optimisation
--------------------------------------
-.. automodule:: src.geneticalgorithm
+Neurodesign: design optimisation
+--------------------------------
+.. automodule:: src.neurodesign
    :members:
    :noindex:
 
@@ -22,8 +22,8 @@ Msequence: generating msequences
    :members:
    :noindex:
 
-Report: summarise results from geneticalgorithm
------------------------------------------------
+Report: summarise results from optimisation
+-------------------------------------------
 .. automodule:: src.report
    :members:
    :noindex:

@@ -194,6 +194,10 @@ class design(object):
         # downsample and whiten deconvM
         idxX = [int(x) for x in np.arange(0, self.experiment.n_tp,
                                          self.experiment.TR / self.experiment.resolution)]
+
+        if len(idxX)-self.experiment.white.shape[0]==1:
+            idxX = idxX[:self.experiment.white.shape[0]]
+
         deconvMdown = deconvM[idxX, :]
         Xwhite = np.dot(
             np.dot(t(deconvMdown), self.experiment.white), deconvMdown)
@@ -204,12 +208,8 @@ class design(object):
             X_Z[:, stim] = deconvM[:, (stim * self.experiment.laghrf):(
                 (stim + 1) * self.experiment.laghrf)].dot(self.experiment.basishrf)
 
-        # downsample to TR
-        idx = [int(x) for x in np.arange(0, self.experiment.n_tp,
-                                         self.experiment.TR / self.experiment.resolution)]
-
-        X_Z = X_Z[idx, :]
-        X_X = X_X[idx, :]
+        X_Z = X_Z[idxX, :]
+        X_X = X_X[idxX, :]
         Zwhite = t(X_Z) * self.experiment.white * X_Z
 
         self.X = Xwhite

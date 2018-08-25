@@ -8,7 +8,7 @@ RUN conda install numpy && \
     conda install pandas && \
     conda install matplotlib
 
-RUN pip install neurodesign > 0.2.01
+RUN pip install neurodesign > 0.2.02
 RUN pip install sklearn
 RUN pip install pdfrw
 RUN pip install reportlab

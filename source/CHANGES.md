@@ -1,3 +1,6 @@
+0.2.02 - 08/24/2018
+* bug with timepoints fix
+
 0.2.01 - 02/09/2018
 * bug in report.py
 

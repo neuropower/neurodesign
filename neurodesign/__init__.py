@@ -4,6 +4,7 @@ This module contains code to find an optimal experimental design for fMRI experi
 .. moduleauthor:: Joke Durnez <joke.durnez@gmail.com>
 
 '''
+from __future__ import absolute_import
 
 from neurodesign.classes import design, experiment, optimisation
 

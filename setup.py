@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import os.path as op
 
 packages = find_packages()
 
@@ -13,4 +14,5 @@ setup(name='neurodesign',
       license='MIT',
       packages=packages,
       install_requires=requirements,
+      package_data={'neurodesign': [op.join('media', '*')]},
       zip_safe=False)

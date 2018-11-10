@@ -18,9 +18,7 @@ from scipy.stats import t
 import seaborn as sns
 import pandas as pd
 import numpy as np
-
-get_ipython().magic(u'matplotlib inline')
-get_ipython().magic(u'load_ext rpy2.ipython')
+import os.path as op
 
 cycles = 1000
 sims = 10000
@@ -119,7 +117,7 @@ POP_RN.optimise()
 plt.plot(POP_GA.optima,label='Genetic Algorithm')
 plt.plot(POP_RN.optima,label='Simulation')
 plt.legend()
-plt.savefig("output/test_scores.pdf")
+plt.savefig(op.join(op.dirname(__file__), 'output', 'test_scores.pdf'))
 
 
 # Below, we repeat the random design generator, but we search only 100 designs and one generation.  As such, this is a random design.

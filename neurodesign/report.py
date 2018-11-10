@@ -1,8 +1,8 @@
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image,Table,PageBreak, Flowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, PageBreak, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import letter
-import matplotlib.gridspec as gridspec
+from matplotlib import gridspec
 from pdfrw import PdfReader, PdfDict
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
@@ -13,11 +13,15 @@ import sklearn.cluster
 import neurodesign
 import numpy as np
 import matplotlib
-import cStringIO
 import seaborn
 import time
 import sys
 import os
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 plt.switch_backend('agg')
 

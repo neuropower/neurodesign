@@ -11,7 +11,6 @@ import pandas as pd
 import progressbar
 import numpy as np
 import itertools
-import StringIO
 import warnings
 import zipfile
 import shutil
@@ -21,6 +20,11 @@ import time
 import math
 import sys
 import os
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 class design(object):

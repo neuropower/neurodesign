@@ -1,23 +1,23 @@
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image,Table,PageBreak, Flowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, PageBreak, Flowable
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.pagesizes import letter
-import matplotlib.gridspec as gridspec
+from matplotlib import gridspec
 from pdfrw import PdfReader, PdfDict
 from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
 from reportlab.lib.units import inch
 import matplotlib.pyplot as plt
 from pdfrw import PdfReader
+from io import BytesIO
 import sklearn.cluster
-import neurodesign
 import numpy as np
 import matplotlib
-import cStringIO
 import seaborn
 import time
 import sys
 import os
+
 
 plt.switch_backend('agg')
 
@@ -35,9 +35,8 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
                             topMargin=40,bottomMargin=18)
 
     Story=[]
-    curpath = os.path.dirname(unicode(__file__, encoding = sys.getfilesystemencoding()))
-
-    logofile = os.path.join(curpath,"media/NeuroDes.png")
+    curpath = os.path.dirname(__file__)
+    logofile = os.path.join(curpath, 'media', 'NeuroDes.png')
     im = Image(logofile, 1*inch, 1.25*inch)
     Story.append(im)
     Story.append(Spacer(1, 12))
@@ -60,7 +59,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     fig = plt.figure(figsize=(6, 6))
     plt.imshow(POP.cov,interpolation="nearest")
     plt.colorbar()
-    imgdata = cStringIO.StringIO()
+    imgdata = BytesIO()
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 
@@ -99,7 +98,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
         plt.axis('off')
         plt.colorbar(ticks=[0,1])
 
-    imgdata = cStringIO.StringIO()
+    imgdata = BytesIO()
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 

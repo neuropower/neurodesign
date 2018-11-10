@@ -49,7 +49,7 @@ class Msequence(object):
 
         # initiate powerVal
         minpow = math.log(mLen+1,baseVal)
-        pos = self.taps[baseVal].keys()
+        pos = list(self.taps[baseVal].keys())
         orders = []
 
         if baseVal == 2:
@@ -62,13 +62,13 @@ class Msequence(object):
         powerVal = pos[np.random.randint(len(pos))]
 
         # which sequences are possible
-        seqKeys = self.taps[baseVal][powerVal].keys()
-
+        seqKeys = list(self.taps[baseVal][powerVal].keys())
+        
         np.random.seed(seed)
         keys = seqKeys[np.random.randint(len(seqKeys))]
 
         shift = 0
-        ms = self.Mseq(baseVal,powerVal,shift,keys)
+        ms = self.Mseq(baseVal, powerVal, shift, keys)
         if mLen > len(ms):
             rep = int(np.ceil(mLen/len(ms)))
             ms = np.tile(ms,rep)

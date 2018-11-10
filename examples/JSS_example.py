@@ -1,4 +1,6 @@
 import neurodesign
+import os
+import os.path as op
 
 EXP = neurodesign.experiment(
  TR=1.2,
@@ -25,7 +27,12 @@ DES1.FCalc(weights=[0.25,0.25,0.25,0.25])
 
 import matplotlib.pyplot as plt
 plt.plot(DES1.Xconv)
-plt.savefig("output/example_figure_1.pdf",format="pdf")
+
+out_dir = 'output'
+if not op.isdir(out_dir):
+    os.makedirs(out_dir)
+
+plt.savefig(op.join(out_dir, 'example_figure_1.pdf') ,format="pdf")
 
 DES2 = neurodesign.design(
     order = [0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1],

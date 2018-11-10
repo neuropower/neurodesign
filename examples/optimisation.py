@@ -1,3 +1,4 @@
+import os
 from neurodesign import experiment, optimisation, generate,msequence,report
 
 EXP = experiment(
@@ -26,7 +27,7 @@ POP = optimisation(
     cycles = 10,
     seed=1,
     outdes=5,
-    folder='/Users/Joke/'
+    folder=os.getcwd()
     )
 
 #########################
@@ -49,4 +50,4 @@ POP.to_next_generation(seed=1001)
 # export report #
 #################
 
-report.make_report(POP,"/Users/Joke/hier.pdf")
+report.make_report(POP, os.path.join(os.path.dirname(__file__), 'test.pdf'))

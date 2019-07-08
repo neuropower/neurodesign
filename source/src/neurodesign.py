@@ -11,7 +11,7 @@ import pandas as pd
 import progressbar
 import numpy as np
 import itertools
-import StringIO
+import io import StringIO
 import warnings
 import zipfile
 import shutil

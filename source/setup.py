@@ -16,7 +16,8 @@ setup(name='neurodesign',
           'math',
           'reportlab',
           'matplotlib',
-          'seaborn'
+          'seaborn',
+          'pdfrw'
           ],
       package_dir={'neurodesign':'src'},
       package_data={'neurodesign':['media/NeuroDes.png']},

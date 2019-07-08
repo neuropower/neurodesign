@@ -13,7 +13,7 @@ import sklearn.cluster
 import neurodesign
 import numpy as np
 import matplotlib
-import io.StringIO
+from  io import StringIO
 import seaborn
 import time
 import sys
@@ -60,7 +60,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     fig = plt.figure(figsize=(6, 6))
     plt.imshow(POP.cov,interpolation="nearest")
     plt.colorbar()
-    imgdata = io.StringIO()
+    imgdata = StringIO()
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 
@@ -99,7 +99,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
         plt.axis('off')
         plt.colorbar(ticks=[0,1])
 
-    imgdata = io.StringIO()
+    imgdata = StringIO()
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 

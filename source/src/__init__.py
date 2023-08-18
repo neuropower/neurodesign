@@ -5,7 +5,7 @@ This module contains code to find an optimal experimental design for fMRI experi
 
 '''
 
-from neurodesign import design, experiment, optimisation
+from .neurodesign import design, experiment, optimisation
 
 from .info import (
     __version__,

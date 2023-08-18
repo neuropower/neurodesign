@@ -11,7 +11,7 @@ import pandas as pd
 import progressbar
 import numpy as np
 import itertools
-import io import StringIO
+from io import BytesIO
 import warnings
 import zipfile
 import shutil
@@ -178,16 +178,16 @@ class design(object):
         # create design matrix in resolution scale (=deltasM in Kao toolbox)
         X_X = np.zeros([self.experiment.n_tp, self.experiment.n_stimuli])
 
-        for stimulus in xrange(self.experiment.n_stimuli):
-            for dur in xrange(stim_duration_tp):
+        for stimulus in range(self.experiment.n_stimuli):
+            for dur in range(stim_duration_tp):
                 X_X[np.array(XindStim) + dur, int(stimulus)
                     ] = [1 if z == stimulus else 0 for z in self.order]
 
         # deconvolved matrix in resolution units
         deconvM = np.zeros([self.experiment.n_tp, int(
             self.experiment.laghrf * self.experiment.n_stimuli)])
-        for stim in xrange(self.experiment.n_stimuli):
-            for j in xrange(int(self.experiment.laghrf)):
+        for stim in range(self.experiment.n_stimuli):
+            for j in range(int(self.experiment.laghrf)):
                 deconvM[j:, self.experiment.laghrf * stim +
                         j] = X_X[:(self.experiment.n_tp - j), stim]
 
@@ -235,7 +235,6 @@ class design(object):
                 invM = scipy.linalg.pinv(self.X)
             except np.linalg.linalg.LinAlgError:
                 invM = np.nan
-        sys.exc_clear()
         invM = np.array(invM)
         st1 = np.dot(self.CX, invM)
         CMC = np.dot(st1, t(self.CX))
@@ -260,7 +259,6 @@ class design(object):
                 invM = scipy.linalg.pinv(self.Z)
             except np.linalg.linalg.LinAlgError:
                 invM = np.nan
-        sys.exc_clear()
         invM = np.array(invM)
         CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
         if Aoptimality == True:
@@ -279,14 +277,14 @@ class design(object):
         '''
         Q = np.zeros([self.experiment.n_stimuli,
                       self.experiment.n_stimuli, confoundorder])
-        for n in xrange(len(self.order)):
+        for n in range(len(self.order)):
             for r in np.arange(1, confoundorder + 1):
                 if n > (r - 1):
                     Q[self.order[n], self.order[n - r], r - 1] += 1
         Qexp = np.zeros([self.experiment.n_stimuli,
                          self.experiment.n_stimuli, confoundorder])
-        for si in xrange(self.experiment.n_stimuli):
-            for sj in xrange(self.experiment.n_stimuli):
+        for si in range(self.experiment.n_stimuli):
+            for sj in range(self.experiment.n_stimuli):
                 for r in np.arange(1, confoundorder + 1):
                     Qexp[si, sj, r - 1] = self.experiment.P[si] * \
                         self.experiment.P[sj] * (self.experiment.n_trials + 1)
@@ -300,7 +298,7 @@ class design(object):
         Compute efficiency of frequencies.
         '''
         trialcount = Counter(self.order)
-        Pobs = [trialcount[x] for x in xrange(self.experiment.n_stimuli)]
+        Pobs = [trialcount[x] for x in range(self.experiment.n_stimuli)]
         self.Ff = np.sum(abs(np.array(
             Pobs) - np.array(self.experiment.n_trials * np.array(self.experiment.P))))
         self.Ff = 1 - self.Ff / self.experiment.FfMax
@@ -524,7 +522,7 @@ class experiment(object):
         # translated from spm_hrf
         p = [6, 16, 1, 1, 6, 0, 32]
         dt = self.resolution
-        s = np.array(xrange(int(np.ceil(p[6] / dt))))
+        s = np.array(range(int(np.ceil(p[6] / dt))))
         # HRF sampled at resolution
         hrf = self.spm_Gpdf(s, p[0] / p[2], dt / p[2]) - \
             self.spm_Gpdf(s, p[1] / p[3], dt / p[3]) / p[4]
@@ -1019,7 +1017,7 @@ class optimisation(object):
             # zip up
             zip_subdir = "OptimalDesign"
             self.zip_filename = "%s.zip" % zip_subdir
-            self.file = StringIO.StringIO()
+            self.file = BytesIO()
             zf = zipfile.ZipFile(self.file, "w")
 
             for fpath in files:
@@ -1048,7 +1046,7 @@ def _find_new_resolution(TR,res):
     n = TR*1000.
     # find divisors of TR*1000
     large_divisors = []
-    for i in xrange(1, int(math.sqrt(n) + 1)):
+    for i in range(1, int(math.sqrt(n) + 1)):
         if n % i == 0:
             large_divisors.append(i)
             if i*i != n:

@@ -13,7 +13,7 @@ import sklearn.cluster
 import neurodesign
 import numpy as np
 import matplotlib
-from  io import StringIO
+from  io import BytesIO
 import seaborn
 import time
 import sys
@@ -35,7 +35,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
                             topMargin=40,bottomMargin=18)
 
     Story=[]
-    curpath = os.path.dirname(unicode(__file__, encoding = sys.getfilesystemencoding()))
+    curpath = os.path.dirname(__file__)
 
     logofile = os.path.join(curpath,"media/NeuroDes.png")
     im = Image(logofile, 1*inch, 1.25*inch)
@@ -57,10 +57,11 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     corr='During the optimisation, the designs are mixed with each other to find better combinations.  As such, the designs can look very similar. Actually, the genetic algorithm uses natural selection as a basis, and as such, the designs can be clustered in families.  This is the covariance matrix between the final {0} designs'.format(POP.G)
     Story.append(Paragraph(corr, styles["Normal"]))
 
+    '''
     fig = plt.figure(figsize=(6, 6))
     plt.imshow(POP.cov,interpolation="nearest")
     plt.colorbar()
-    imgdata = StringIO()
+    imgdata = BytesIO()
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 
@@ -68,6 +69,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     image = reader(imgdata)
     img = PdfImage(image,width=300,height=250)
     Story.append(img)
+    '''
 
     Story.append(PageBreak())
 
@@ -99,7 +101,8 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
         plt.axis('off')
         plt.colorbar(ticks=[0,1])
 
-    imgdata = StringIO()
+    '''
+    imgdata = BytesIO()
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 
@@ -107,6 +110,7 @@ def make_report(POP,outfile="NeuroDesign.pdf"):
     image = reader(imgdata)
     img = PdfImage(image,width=500,height=600)
     Story.append(img)
+    '''
 
     Story.append(PageBreak())
 
@@ -197,7 +201,7 @@ class PdfImage(Flowable):
                 raise ValueError("Bad hAlign value " + str(a))
         canv.saveState()
         img = self.img_data
-        if isinstance(img, PdfDict):
+        if True or isinstance(img, PdfDict):
             xscale = self.img_width / img.BBox[2]
             yscale = self.img_height / img.BBox[3]
             canv.translate(x, y)

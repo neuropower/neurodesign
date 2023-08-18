@@ -201,7 +201,7 @@ class PdfImage(Flowable):
                 raise ValueError("Bad hAlign value " + str(a))
         canv.saveState()
         img = self.img_data
-        if True or isinstance(img, PdfDict):
+        if isinstance(img, PdfDict):
             xscale = self.img_width / img.BBox[2]
             yscale = self.img_height / img.BBox[3]
             canv.translate(x, y)

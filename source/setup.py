@@ -1,5 +1,10 @@
 from setuptools import setup
 
+import os.path as op
+
+with open('requirements.txt') as rf:
+    requirements = rf.readlines()
+
 setup(name='neurodesign',
       version='0.2.02',
       description='Package for design optimisation for fMRI experiments',
@@ -7,18 +12,7 @@ setup(name='neurodesign',
       author_email='joke.durnez@gmail.com',
       license='MIT',
       packages=['neurodesign'],
-      install_required=[
-          'numpy>1.0.0',
-          'scipy>1.0.0',
-          'sklearn>0.15.0',
-          'pandas>0.15.0',
-          'progressbar>2.0',
-          'math',
-          'reportlab',
-          'matplotlib',
-          'seaborn',
-          'pdfrw'
-          ],
+      install_required=requirements,
       package_dir={'neurodesign':'src'},
       package_data={'neurodesign':['media/NeuroDes.png']},
       zip_safe=False)

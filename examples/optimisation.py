@@ -1,6 +1,6 @@
 import os
 
-from neurodesign import experiment, generate, msequence, optimisation, report
+from neurodesign import experiment, optimisation, report
 
 EXP = experiment(
     TR=2,

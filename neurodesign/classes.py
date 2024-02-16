@@ -1,27 +1,21 @@
 import copy
-import itertools
 import math
 import os
 import shutil
-import sys
-import time
 import warnings
 import zipfile
 from collections import Counter
 from io import BytesIO
 
 import numpy as np
-import pandas as pd
 import progressbar
 import scipy
 import scipy.linalg
 import sklearn.cluster
 from numpy import transpose as t
-from numpy.linalg import inv
-from scipy import linalg
 from scipy.special import gamma
 
-from . import generate, msequence, report
+from . import generate, report
 
 
 class design:

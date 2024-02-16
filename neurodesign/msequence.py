@@ -1,22 +1,9 @@
-#!/usr/bin/python2.7
-#
-# Author: Joke Durnez
-#
-# Description: Generate m sequences
-#
-# Loosely translated from http://fmriserver.ucsd.edu/ttliu
-#
-# Version: 1
-#
-# Date: 2016-07-13
-#
-# ===========================================================
+"""Generate m sequences.
 
+Loosely translated from http://fmriserver.ucsd.edu/ttliu
+"""
 
 import math
-import os
-import pickle
-import sys
 
 import numpy as np
 

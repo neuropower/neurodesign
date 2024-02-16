@@ -1,5 +1,3 @@
-import numpy as np
-
 import neurodesign
 from neurodesign import generate
 

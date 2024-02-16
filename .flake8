@@ -7,7 +7,7 @@
 	; env,
 	; venv,
 	; doc/_build
-; --select = D,E,F,W,C90,CFQ
+--select = A,B,C,D,E,F,W,C90,CFQ,FS
 ; docstring-convention = numpy
 max-line-length = 100
 # For PEP8 error codes see
@@ -31,14 +31,11 @@ ignore =
 	E713,
 	E721,
 	E741,
-	F401,
 	F821,
 	F841,
 	FS002,
 	FS001,
-	W503,
-	W504,
-	W605,
+	W503
 # for compatibility with black
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
 extend-ignore = E203

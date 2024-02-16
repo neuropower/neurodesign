@@ -1,13 +1,8 @@
 import os
-import sys
 import time
-from io import BytesIO
 
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn
-import sklearn.cluster
 from matplotlib import gridspec
 from pdfrw import PdfDict, PdfReader
 from pdfrw.buildxobj import pagexobj
@@ -15,7 +10,6 @@ from pdfrw.toreportlab import makerl
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.lib.utils import ImageReader
 from reportlab.platypus import (
     Flowable,
     Image,

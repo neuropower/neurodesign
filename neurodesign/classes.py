@@ -55,8 +55,7 @@ class design:
             raise ValueError("length of design (orders) does not comply with experiment")
 
     def check_maxrep(self, maxrep):
-        """
-        Function to check whether design does not exceed maximum repeats within design.
+        """Check whether design does not exceed maximum repeats within design.
 
         :param maxrep: How many times should a stimulus maximally be repeated.
         :type maxrep: integer
@@ -72,8 +71,7 @@ class design:
         return repcheck
 
     def check_hardprob(self):
-        """
-        Function to check whether frequencies of stimuli are **exactly** the prespecified frequencies.
+        """Check whether frequencies of stimuli are **exactly** the prespecified frequencies.
 
         :returns probcheck: Boolean indicating probabilities are respected
         """
@@ -89,8 +87,7 @@ class design:
         return True
 
     def crossover(self, other, seed=1234):
-        """
-        Function to crossover design with other design and create offspring.
+        """Crossover design with other design and create offspring.
 
         :param other: The design with which the design will be mixed
         :type other: design object
@@ -113,8 +110,7 @@ class design:
         return [offspring1, offspring2]
 
     def mutation(self, q, seed=1234):
-        """
-        Function to mutate q% of the stimuli with another stimulus.
+        """Mutate q% of the stimuli with another stimulus.
 
         :param q: The percentage of stimuli that should be mutated
         :type q: float
@@ -531,8 +527,7 @@ class experiment:
         return self
 
     def canonical(self):
-        """
-        This function generates the canonical hrf.
+        """Generate the canonical hrf.
 
         :param resolution: resolution to sample the canonical hrf
         :type resolution: float
@@ -658,8 +653,9 @@ class optimisation:
         return self
 
     def check_develop(self, design, weights=None):
-        """
-        Function to check and develop a design to the population.  Function will check design against strict options and develop the design if valid.
+        """Check and develop a design to the population.
+
+        Function will check design against strict options and develop the design if valid.
 
         :param design: Design to be added to population.
         :type design: design object
@@ -693,8 +689,7 @@ class optimisation:
         return design
 
     def add_new_designs(self, weights=None, R=None):
-        """
-        This function generates the population.
+        """Generate the population.
 
         :param experiment: The experimental setup of the fMRI experiment.
         :type experiment: experiment
@@ -852,8 +847,7 @@ class optimisation:
         return self
 
     def to_next_generation(self, weights=None, seed=1234, optimisation=None):
-        """
-        This function goes from one generation to the next.
+        """Go from one generation to the next.
 
         :param weights: weights for efficiency calculation.
         :type weights: list of floats, summing to 1

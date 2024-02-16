@@ -6,8 +6,7 @@ from . import msequence
 
 
 def order(nstim, ntrials, probabilities, ordertype, seed=1234):
-    """
-    Function will generate an order of stimuli.
+    """Generate an order of stimuli.
 
     :param nstim: The number of different stimuli (or conditions)
     :type nstim: integer
@@ -49,8 +48,7 @@ def order(nstim, ntrials, probabilities, ordertype, seed=1234):
 
 
 def iti(ntrials, model, min=None, mean=None, max=None, lam=None, resolution=0.1, seed=1234):
-    """
-    Function will generate an order of stimuli.
+    """Generate an order of stimuli.
 
     :param ntrials: The total number of trials
     :type ntrials: integer

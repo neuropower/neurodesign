@@ -29,8 +29,7 @@ class Msequence:
         self.tapsfnc()
 
     def GenMseq(self, mLen, stimtypeno, seed):
-        """
-        Function to generate a random msequence given the length of the desired sequence and the number of different values.
+        """Generate a random msequence given the length of the desired sequence and the number of different values.
 
         :param stimtypeno: Number of different stimulus types
         :type stimtypeno: integer
@@ -79,8 +78,7 @@ class Msequence:
         return self
 
     def Mseq(self, baseVal, powerVal, shift=None, whichSeq=None, userTaps=None):
-        """
-        Function to generate a specific msequence given the base and power values.
+        """Generate a specific msequence given the base and power values.
 
         :param powerVal: The power of the msequence
         :type powerVal: integer

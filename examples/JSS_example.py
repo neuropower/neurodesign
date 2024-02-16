@@ -1,5 +1,8 @@
 import os
 import os.path as op
+from collections import Counter
+
+import matplotlib.pyplot as plt
 
 import neurodesign
 
@@ -24,7 +27,6 @@ DES1.designmatrix()
 
 DES1.FCalc(weights=[0.25, 0.25, 0.25, 0.25])
 
-import matplotlib.pyplot as plt
 
 plt.plot(DES1.Xconv)
 
@@ -48,7 +50,6 @@ DES3, DES4 = DES1.crossover(DES2, seed=2000)
 print(DES3.order)
 print(DES4.order)
 
-from collections import Counter
 
 order = neurodesign.generate.order(
     nstim=4, ntrials=100, probabilities=[0.25, 0.25, 0.25, 0.25], ordertype="random", seed=1234

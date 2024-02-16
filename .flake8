@@ -1,0 +1,60 @@
+[flake8]
+; exclude =
+    ; .git,
+    ; __pycache__,
+    ; build,
+    ; dist,
+	; env,
+	; venv,
+	; doc/_build
+; --select = D,E,F,W,C90,CFQ
+; docstring-convention = numpy
+max-line-length = 100
+# For PEP8 error codes see
+# http://pep8.readthedocs.org/en/latest/intro.html#error-codes
+	# D100-D104: missing docstring
+	# D105: missing docstring in magic method
+	# D107: missing docstring in __init__
+	# D205: 1 blank line required between summary line and description
+	# D400: first line should end with a period
+	# E203: whitespace before ':'
+	# E402: module level import not at top of file
+	# F401: module imported but unused
+	# W503: line break before binary operator
+	# W504: line break after binary operator
+; per-file-ignores =
+	; **/__init__.py: D104
+ignore =
+	D105,
+	D107,
+	E402,
+	W503,
+	W504,
+	W605,
+	CFQ003,
+	F401,
+	F821,
+	E501,
+	F841,
+	D102,
+	E711,
+	E713,
+	FS002,
+	D401,
+	D100,
+	E721,
+	FS001,
+	D103,
+	CFQ,
+	D202,
+	D201,
+	D200,
+	D101,
+	D400,
+	E712,
+	E265,
+	E741,
+	E712
+# for compatibility with black
+# https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
+extend-ignore = E203

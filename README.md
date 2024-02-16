@@ -17,5 +17,4 @@ The documentation of neurodesign is available at [ReadTheDocs](http://neurodesig
     |---- source            Folder with the source code of the python package
     |       |
     |       |---- media     Folder contains the logo of neurodesign, which is used
-                            in the reports.       
-
+                            in the reports.

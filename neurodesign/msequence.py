@@ -63,7 +63,7 @@ class Msequence(object):
 
         # which sequences are possible
         seqKeys = list(self.taps[baseVal][powerVal].keys())
-        
+
         np.random.seed(seed)
         keys = seqKeys[np.random.randint(len(seqKeys))]
 

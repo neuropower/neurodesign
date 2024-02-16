@@ -235,7 +235,7 @@ class design(object):
                 invM = scipy.linalg.pinv(self.X)
             except np.linalg.linalg.LinAlgError:
                 invM = np.nan
-        
+
         invM = np.array(invM)
         st1 = np.dot(self.CX, invM)
         CMC = np.dot(st1, t(self.CX))
@@ -260,7 +260,7 @@ class design(object):
                 invM = scipy.linalg.pinv(self.Z)
             except np.linalg.linalg.LinAlgError:
                 invM = np.nan
-        
+
         invM = np.array(invM)
         CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
         if Aoptimality == True:

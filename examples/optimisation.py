@@ -49,5 +49,5 @@ POP.to_next_generation(seed=1001)
 #################
 # export report #
 #################
-
 report.make_report(POP, os.path.join(os.path.dirname(__file__), 'test.pdf'))
+

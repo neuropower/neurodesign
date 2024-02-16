@@ -3,11 +3,12 @@ import os.path as op
 
 packages = find_packages()
 
+
 with open('requirements.txt') as rf:
     requirements = rf.readlines()
 
 setup(name='neurodesign',
-      version='0.2.2',
+      version='0.2.02',
       description='Package for design optimisation for fMRI experiments',
       author='Joke Durnez',
       author_email='joke.durnez@gmail.com',

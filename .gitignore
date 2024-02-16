@@ -1,3 +1,8 @@
+report.pdf
+examples/test.pdf
+output
+design_*
+
 test_db/
 
 # Byte-compiled / optimized / DLL files

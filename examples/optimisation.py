@@ -26,7 +26,7 @@ POP = optimisation(
     cycles = 10,
     seed=1,
     outdes=5,
-    folder='/Users/Joke/'
+    folder='./optimisation_out'
     )
 
 #########################
@@ -49,4 +49,4 @@ POP.to_next_generation(seed=1001)
 # export report #
 #################
 
-report.make_report(POP,"/Users/Joke/hier.pdf")
+report.make_report(POP,"./optimisation_out/hier.pdf")

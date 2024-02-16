@@ -68,7 +68,6 @@ def iti(ntrials, model, min=None, mean=None, max=None, lam=None, resolution=0.1,
     :type seed: integer or None
     :returns iti: A list with the created ITI's
     """
-
     if model == "fixed":
         smp = [0] + [mean] * (ntrials - 1)
         smp = resolution * np.round(smp / resolution)

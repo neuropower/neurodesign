@@ -77,7 +77,6 @@ class design:
 
         :returns probcheck: Boolean indicating probabilities are respected
         """
-
         obscnt = Counter(self.order).values()
         obsprob = np.round(obscnt / np.sum(obscnt), decimals=2)
         if not len(self.experiment.P) == len(obsprob):
@@ -99,7 +98,6 @@ class design:
         :type seed: integer or None
         :returns offspring: List of two offspring designs.
         """
-
         # check whether designs are compatible
         assert len(self.order) == len(other.order)
 
@@ -124,7 +122,6 @@ class design:
         :type seed: integer or None
         :returns mutated: Mutated design
         """
-
         np.random.seed(seed)
         mut_ind = np.random.choice(len(self.order), int(len(self.order) * q), replace=False)
         mutated = copy.copy(self.order)
@@ -139,7 +136,6 @@ class design:
 
     def designmatrix(self):
         """Expand from order of stimuli to a fMRI timeseries."""
-
         # ITIs to onsets
         if self.experiment.restnum > 0:
             orderli = list(self.order)
@@ -312,7 +308,6 @@ class design:
         :param weights: Weights given to each of the efficiency metrics in this order: Estimation, Detection, Frequencies, Confounders.
         :type weights: list of floats
         """
-
         if weights[0] > 0:
             self.FeCalc(Aoptimality)
         if weights[1] > 0:
@@ -506,7 +501,6 @@ class experiment:
         - autocorrelation matrix
         - CX
         """
-
         # hrf
         self.canonical()
 
@@ -868,7 +862,6 @@ class optimisation:
         :param optimisation: The type of optimisation - 'GA' or 'simulation'
         :type optimisation: string
         """
-
         if optimisation == None:
             optimisation = self.optimisation
 
@@ -931,7 +924,6 @@ class optimisation:
 
     def optimise(self, optimisation="GA"):
         """Run design optimization."""
-
         if self.exp.FcMax == 1 and self.exp.FfMax == 1:
             self.exp.max_eff()
 

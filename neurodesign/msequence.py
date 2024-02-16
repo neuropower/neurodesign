@@ -39,7 +39,6 @@ class Msequence:
         :param seed: Seed with which msequence is sampled.
         :type seed: integer
         """
-
         self.mLen = mLen
         self.stimtypeno = stimtypeno
 
@@ -94,7 +93,6 @@ class Msequence:
         :param userTaps: if user wants to specify own polynomial taps
         :type userTaps: list
         """
-
         # compute total length
         bitNum = int(baseVal**powerVal - 1)
 
@@ -154,7 +152,6 @@ class Msequence:
 
     def tapsfnc(self):
         """Generate taps leading to msequences."""
-
         self.taps = {
             # baseval 2
             2: {

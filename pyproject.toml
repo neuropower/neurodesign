@@ -1,9 +1,75 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling", "hatch-vcs"]
+
+[project]
+authors = [{name = "Joke Durnez"}]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved",
+    "Programming Language :: Python",
+    "Topic :: Software Development",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "numpy>1.0.0",
+    "scipy>1.0.0",
+    "scikit-learn>0.15.0",
+    "pandas>0.15.0",
+    "progressbar>2.0",
+    "reportlab",
+    "pdfrw",
+    "matplotlib",
+    "seaborn"
+]
+description = "Package for design optimisation for fMRI experiments"
+# Version from setuptools_scm
+dynamic = ["version"]
+license = {text = "MIT"}
+maintainers = [{name = "Joke Durnez", email = "joke.durnez@gmail.com"}]
+name = "neurodesign"
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+# A combination of dependencies useful for developers
+dev = [
+    "neurodesign[test]",
+    'pre-commit',
+    'tox'
+]
+# For running unit and docstring tests
+test = [
+    "coverage",
+    "pytest>=6.0.0",
+    "pytest-cov"
+]
+
 [tool.black]
 line-length = 100
 
 [tool.codespell]
 ignore-words = ".github/codespell_ignore_words.txt"
 skip = "examples/comparison_neurodesign.html,examples/comparison_neurodesign.ipynb"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "neurodesign/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["neurodesign"]
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.isort]
 combine_as_imports = true

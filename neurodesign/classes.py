@@ -532,7 +532,7 @@ class experiment:
 
     def canonical(self):
         """
-        This function generates the canonical hrf
+        This function generates the canonical hrf.
 
         :param resolution: resolution to sample the canonical hrf
         :type resolution: float

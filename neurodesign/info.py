@@ -1,4 +1,4 @@
-"""Base module variables"""
+"""Base module variables."""
 
 __version__ = "0.2.01"
 __author__ = "Joke Durnez"

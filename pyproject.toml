@@ -44,9 +44,14 @@ requires-python = ">=3.8"
 [project.optional-dependencies]
 # A combination of dependencies useful for developers
 dev = [
-    "neurodesign[test]",
+    "neurodesign[doc,test]",
     'pre-commit',
     'tox'
+]
+# Requirements necessary for building the documentation
+doc = [
+    "sphinx",
+    "sphinx-copybutton"
 ]
 # For running unit and docstring tests
 test = [

@@ -1,6 +1,8 @@
-from setuptools import setup
-
+from setuptools import setup, find_packages
 import os.path as op
+
+packages = find_packages()
+
 
 with open('requirements.txt') as rf:
     requirements = rf.readlines()
@@ -11,8 +13,7 @@ setup(name='neurodesign',
       author='Joke Durnez',
       author_email='joke.durnez@gmail.com',
       license='MIT',
-      packages=['neurodesign'],
-      install_required=requirements,
-      package_dir={'neurodesign':'src'},
-      package_data={'neurodesign':['media/NeuroDes.png']},
+      packages=packages,
+      install_requires=requirements,
+      package_data={'neurodesign': [op.join('media', '*')]},
       zip_safe=False)

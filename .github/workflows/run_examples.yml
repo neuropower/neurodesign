@@ -17,7 +17,7 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    black:
+    run_examples:
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false

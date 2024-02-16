@@ -7,7 +7,7 @@
 	; env,
 	; venv,
 	; doc/_build
---select = A,B,C,D,E,F,W,C90,CFQ,FS
+--select = A,B,C,D,E,F,W,C90,FS
 ; docstring-convention = numpy
 max-line-length = 100
 # For PEP8 error codes see
@@ -15,15 +15,12 @@ max-line-length = 100
 ; per-file-ignores =
 	; **/__init__.py: D104
 ignore =
-	CFQ003,
-	CFQ,
 	D100,
 	D101,
 	D102,
 	D103,
 	D105,
 	D107,
-	E265,
 	E501,
 	E711,
 	E712,

@@ -22,9 +22,7 @@ import numpy as np
 
 
 class Msequence:
-    """
-    A class for an order of experimental trials.
-    """
+    """Create instance for an order of experimental trials."""
 
     def __init__(self):
         # read in taps file and count
@@ -155,9 +153,7 @@ class Msequence:
         return ms
 
     def tapsfnc(self):
-        """
-        Function to generate taps leading to msequences.
-        """
+        """Generate taps leading to msequences."""
 
         self.taps = {
             # baseval 2

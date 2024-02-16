@@ -138,9 +138,7 @@ class design:
         return offspring
 
     def designmatrix(self):
-        """
-        Expand from order of stimuli to a fMRI timeseries.
-        """
+        """Expand from order of stimuli to a fMRI timeseries."""
 
         # ITIs to onsets
         if self.experiment.restnum > 0:
@@ -298,9 +296,7 @@ class design:
         return self
 
     def FfCalc(self):
-        """
-        Compute efficiency of frequencies.
-        """
+        """Compute efficiency of frequencies."""
         trialcount = Counter(self.order)
         Pobs = [trialcount[x] for x in range(self.experiment.n_stimuli)]
         self.Ff = np.sum(
@@ -446,9 +442,7 @@ class experiment:
         self.max_eff()
 
     def max_eff(self):
-        """
-        Function to compute maximum efficiency for Confounding and Frequency efficiency.
-        """
+        """Compute maximum efficiency for Confounding and Frequency efficiency."""
         NulDesign = design(
             order=[np.argmin(self.P)] * self.n_trials,
             ITI=[0] + [self.ITImean] * (self.n_trials - 1),
@@ -463,9 +457,7 @@ class experiment:
         return self
 
     def countstim(self):
-        """
-        Function to compute some arguments depending on other arguments.
-        """
+        """Compute some arguments depending on other arguments."""
         self.trial_duration = self.stim_duration + self.t_pre + self.t_post
 
         if self.ITImodel == "uniform":
@@ -497,9 +489,7 @@ class experiment:
             self.duration = duration
 
     def CreateTsComp(self):
-        """
-        This function computes the number of scans and timpoints (in seconds and resolution units)
-        """
+        """Compute the number of scans and timpoints (in seconds and resolution units)."""
         self.n_scans = int(np.ceil(self.duration / self.TR))  # number of scans
         # number of timepoints (in resolution)
         self.n_tp = int(np.ceil(self.duration / self.resolution))
@@ -509,8 +499,12 @@ class experiment:
         return self
 
     def CreateLmComp(self):
-        """
-        This function generates components for the linear model: hrf, whitening matrix, autocorrelation matrix and CX
+        """Generate components for the linear model.
+
+        - hrf,
+        - whitening matrix
+        - autocorrelation matrix
+        - CX
         """
 
         # hrf
@@ -569,9 +563,7 @@ class experiment:
 
     @staticmethod
     def drift(s, deg=3):
-        """
-        Function to compute a drift component
-        """
+        """Compute a drift component."""
         S = np.ones([deg, len(s)])
         s = np.array(s)
         tmpt = np.array(2.0 * s / float(len(s) - 1) - 1)
@@ -582,17 +574,14 @@ class experiment:
 
     @staticmethod
     def spm_Gpdf(s, h, l):
-        """
-        Function to generate gamma pdf
-        """
+        """Generate gamma pdf."""
         s = np.array(s)
         res = (h - 1) * np.log(s) + h * np.log(l) - l * s - np.log(gamma(h))
         return np.exp(res)
 
 
 class optimisation:
-    """
-    This class represents the population of experimental designs for fMRI.
+    """Represent the population of experimental designs for fMRI.
 
     :param experiment: The experimental setup of the fMRI experiment.
     :type experiment: experiment
@@ -666,9 +655,7 @@ class optimisation:
         self.cov = None
 
     def change_seed(self):
-        """
-        Function to change the seed.
-        """
+        """Change the seed."""
         if self.seed < 4 * 10**9:
             self.seed = self.seed + 1000
         else:
@@ -925,9 +912,7 @@ class optimisation:
         return self
 
     def clear(self):
-        """
-        Function to clear results between optimalisations (maximum Fe, Fd or opt)
-        """
+        """Clear results between optimalisations (maximum Fe, Fd or opt)."""
         self.designs = []
         self.optima = []
         self.finished = False
@@ -945,9 +930,7 @@ class optimisation:
         return self
 
     def optimise(self, optimisation="GA"):
-        """
-        Function to run design optimization
-        """
+        """Run design optimization."""
 
         if self.exp.FcMax == 1 and self.exp.FfMax == 1:
             self.exp.max_eff()

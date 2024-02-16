@@ -3,7 +3,8 @@ examples/test.pdf
 output
 design_*
 
-test_db/
+# hatch handles this one
+neurodesign/_version.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

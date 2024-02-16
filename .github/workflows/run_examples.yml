@@ -1,0 +1,37 @@
+---
+name: Run examples
+
+on:
+    push:
+        branches:
+        -   master
+    pull_request:
+        branches:
+        -   '*'
+
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    black:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                example: [comparedesigns.py, comparison_neurodesign.py, JSS_example.py, optimisation.py]
+        steps:
+        -   name: Checkout
+            uses: actions/checkout@v4
+        -   name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+                python-version: '3.12'
+                allow-prereleases: false
+        -   name: Install neurodesign
+            run: python -m pip install .
+        -   name: Run example ${{ matrix.example }}
+            run: python examples/${{ matrix.example }}

@@ -6,24 +6,24 @@ Neurodesign documentation
 
 Neurodesign: design optimisation
 --------------------------------
-.. automodule:: src.neurodesign
+.. automodule:: neurodesign
    :members:
    :noindex:
 
 Generate: generating stimulus order and ITI's
 ---------------------------------------------
-.. automodule:: src.generate
+.. automodule:: neurodesign.generate
    :members:
    :noindex:
 
 Msequence: generating msequences
 --------------------------------
-.. automodule:: src.msequence
+.. automodule:: neurodesign.msequence
    :members:
    :noindex:
 
 Report: summarise results from optimisation
 -------------------------------------------
-.. automodule:: src.report
+.. automodule:: neurodesign.report
    :members:
    :noindex:

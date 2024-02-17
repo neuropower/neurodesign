@@ -35,20 +35,13 @@ def order(
     :returns order: A list with the created order of stimuli
     """
     if ordertype not in ["random", "blocked", "msequence"]:
-        raise ValueError(ordertype + " not known.")
+        raise ValueError(f"{ordertype} not known.")
 
-    if ordertype == "random":
-        np.random.seed(seed)
-        mult = np.random.multinomial(1, probabilities, ntrials)
-        order = [x.tolist().index(1) for x in mult]
-
-    elif ordertype == "blocked":
+    if ordertype == "blocked":
         np.random.seed(seed)
         blocksize = float(np.random.choice(np.arange(1, 10), 1)[0])
         nblocks = int(np.ceil(ntrials / blocksize))
-        np.random.seed(seed)
-        mult = np.random.multinomial(1, probabilities, nblocks)
-        blockorder = [x.tolist().index(1) for x in mult]
+        blockorder = _extracted_from_order_40(seed, probabilities, nblocks)
         order = np.repeat(blockorder, blocksize)[:ntrials]
 
     elif ordertype == "msequence":
@@ -58,7 +51,17 @@ def order(
         id = np.random.randint(len(order.orders))
         order = order.orders[id]
 
+    elif ordertype == "random":
+        order = _extracted_from_order_40(seed, probabilities, ntrials)
     return order
+
+
+# TODO Rename this here and in `order`
+def _extracted_from_order_40(seed, probabilities, arg2):
+    np.random.seed(seed)
+    mult = np.random.multinomial(1, probabilities, arg2)
+    result = [x.tolist().index(1) for x in mult]
+    return result
 
 
 def iti(

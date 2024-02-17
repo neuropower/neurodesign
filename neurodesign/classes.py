@@ -46,9 +46,9 @@ class design:
         self.experiment = experiment
 
         # assert whether design is valid
-        if not len(self.ITI) == experiment.n_trials:
+        if len(self.ITI) != experiment.n_trials:
             raise ValueError("length of design (ITI's) does not comply with experiment")
-        if not len(self.order) == experiment.n_trials:
+        if len(self.order) != experiment.n_trials:
             raise ValueError("length of design (orders) does not comply with experiment")
 
     def check_maxrep(self, maxrep):
@@ -59,10 +59,10 @@ class design:
         :returns repcheck: Boolean indicating maximum repeats are respected
         """
         for stim in range(self.experiment.n_stimuli):
-            repcheck = not "".join(str(e) for e in [stim] * maxrep) in "".join(
+            repcheck = "".join(str(e) for e in [stim] * maxrep) not in "".join(
                 str(e) for e in self.order
             )
-            if repcheck is False:
+            if not repcheck:
                 break
 
         return repcheck
@@ -75,14 +75,11 @@ class design:
         """
         obscnt = Counter(self.order).values()
         obsprob = np.round(obscnt / np.sum(obscnt), decimals=2)
-        if not len(self.experiment.P) == len(obsprob):
+        if len(self.experiment.P) != len(obsprob):
             return False
 
         close = np.isclose(np.array(self.experiment.P), np.array(obsprob), atol=0.001)
-        if not np.sum(close) == len(obsprob):
-            return False
-
-        return True
+        return np.sum(close) == len(obsprob)
 
     def crossover(self, other, seed=1234):
         """Crossover design with other design and create offspring.
@@ -494,21 +491,8 @@ class experiment:
         if self.ITImodel == "uniform":
             self.ITImean = (self.ITImax + self.ITImin) / 2
         if self.duration:
-            if not self.restnum == 0:
-                # duration of block between rest
-                blockdurNR = self.restnum * (self.ITImean + self.trial_duration)
-                blockdurWR = blockdurNR + self.restdur  # duration of block including rest
-                # number of blocks
-                blocknum = np.floor(self.duration / blockdurWR)
-                n_trials = blocknum * self.restnum
-
-                remain = self.duration - (blocknum * blockdurWR)
-                if remain >= blockdurNR:
-                    n_trials = n_trials + self.restnum
-                else:
-                    extratrials = np.floor(remain / (self.ITImean + self.trial_duration))
-                    n_trials = n_trials + extratrials
-                self.n_trials = int(n_trials)
+            if self.restnum != 0:
+                self._extracted_from_countstim_10()
             else:
                 self.n_trials = int(self.duration / (self.ITImean + self.trial_duration))
         else:
@@ -520,6 +504,23 @@ class experiment:
                     np.floor(self.n_trials / self.restnum) * self.restdur
                 )
             self.duration = duration
+
+    # TODO Rename this here and in `countstim`
+    def _extracted_from_countstim_10(self):
+        # duration of block between rest
+        blockdurNR = self.restnum * (self.ITImean + self.trial_duration)
+        blockdurWR = blockdurNR + self.restdur  # duration of block including rest
+        # number of blocks
+        blocknum = np.floor(self.duration / blockdurWR)
+        n_trials = blocknum * self.restnum
+
+        remain = self.duration - (blocknum * blockdurWR)
+        if remain >= blockdurNR:
+            n_trials = n_trials + self.restnum
+        else:
+            extratrials = np.floor(remain / (self.ITImean + self.trial_duration))
+            n_trials = n_trials + extratrials
+        self.n_trials = int(n_trials)
 
     def CreateTsComp(self):
         """Compute the number of scans and timpoints (in seconds and resolution units)."""
@@ -694,11 +695,7 @@ class optimisation:
         self.outdes = outdes
         self.folder = folder
         self.optimisation = optimisation
-        if seed:
-            self.seed = seed
-        else:
-            self.seed = np.random.randint(10000)
-
+        self.seed = seed or np.random.randint(10000)
         self.designs = []
         self.optima = []
         self.bestdesign = None
@@ -706,11 +703,7 @@ class optimisation:
 
     def change_seed(self):
         """Change the seed."""
-        if self.seed < 4 * 10**9:
-            self.seed = self.seed + 1000
-        else:
-            self.seed = 1
-
+        self.seed = self.seed + 1000 if self.seed < 4 * 10**9 else 1
         return self
 
     def check_develop(self, design, weights=None):
@@ -729,12 +722,10 @@ class optimisation:
             weights = self.weights
 
         # check maxrep, hardprob, every stimulus at least once
-        if self.exp.maxrep is not None:
-            if not design.check_maxrep(self.exp.maxrep):
-                return False
-        if self.exp.hardprob:
-            if not design.check_hardprob():
-                return False
+        if self.exp.maxrep is not None and not design.check_maxrep(self.exp.maxrep):
+            return False
+        if not design.check_hardprob() and self.exp.hardprob:
+            return False
         if len(np.unique(design.order)) < self.exp.n_stimuli:
             return False
 
@@ -746,10 +737,7 @@ class optimisation:
         design.FCalc(
             weights, confoundorder=self.exp.confoundorder, Aoptimality=self.Aoptimality
         )
-        if np.isnan(design.F):
-            return False
-
-        return design
+        return False if np.isnan(design.F) else design
 
     def add_new_designs(self, weights=None, R=None):
         """Generate the population.
@@ -811,9 +799,8 @@ class optimisation:
             fulldes = self.check_develop(des, weights)
             if fulldes is False:
                 continue
-            else:
-                self.designs.append(fulldes)
-                NDes = NDes + 1
+            self.designs.append(fulldes)
+            NDes += 1
 
         return self
 
@@ -880,7 +867,7 @@ class optimisation:
         # select designs with F>median(F):
         crossind = range(len(self.designs))
 
-        nparents = int(len(crossind))
+        nparents = len(crossind)
         npairs = int(nparents / 2.0)
 
         np.random.seed(seed)
@@ -900,9 +887,8 @@ class optimisation:
                 baby = self.check_develop(baby, weights)
                 if baby is False:
                     continue
-                else:
-                    self.designs.append(baby)
-                    count = count + 1
+                self.designs.append(baby)
+                count = count + 1
 
         return self
 
@@ -956,13 +942,12 @@ class optimisation:
 
         # check convergence
         gen = len(self.optima)
-        if gen > 1000:
-            if self.optima[-1] > self.optima[gen - 1000]:
-                self.finished = True
+        if gen > 1000 and self.optima[-1] > self.optima[gen - 1000]:
+            self.finished = True
 
         # select best G
         cutoff = np.sort(efficiencies)[::-1][self.G]
-        self.designs = [des for ind, des in enumerate(self.designs) if des.F >= cutoff]
+        self.designs = [des for des in self.designs if des.F >= cutoff]
 
         return self
 
@@ -995,7 +980,7 @@ class optimisation:
             self.add_new_designs(weights=[1, 0, 0, 0])
             # loop
             bar = progressbar.ProgressBar()
-            for generation in bar(range(self.preruncycles)):
+            for _ in bar(range(self.preruncycles)):
                 self.to_next_generation(seed=self.seed, weights=[1, 0, 0, 0])
                 if self.finished:
                     continue
@@ -1006,7 +991,7 @@ class optimisation:
             self.add_new_designs(weights=[0, 1, 0, 0])
             # loop
             bar = progressbar.ProgressBar()
-            for generation in bar(range(self.preruncycles)):
+            for _ in bar(range(self.preruncycles)):
                 self.to_next_generation(seed=self.seed, weights=[0, 1, 0, 0])
                 if self.finished:
                     continue
@@ -1017,7 +1002,7 @@ class optimisation:
         self.add_new_designs()
         # loop
         bar = progressbar.ProgressBar()
-        for generation in bar(range(self.cycles)):
+        for _ in bar(range(self.cycles)):
             self.to_next_generation(seed=self.seed)
             if self.finished:
                 continue

@@ -696,7 +696,7 @@ class optimisation:
         self.convergence = convergence
         self.Aoptimality = Aoptimality
         self.outdes = outdes
-        self.folder = Path(folder).absolute()
+        self.folder = Path(folder).absolute() if folder else None
         self.optimisation = optimisation
         self.seed = seed or np.random.randint(10000)
         self.designs = []

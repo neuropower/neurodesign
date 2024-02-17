@@ -24,7 +24,7 @@ exp = experiment(
     ITImax=4,
 )
 
-POP = optimisation(
+population = optimisation(
     experiment=exp,
     weights=[0, 0.5, 0.25, 0.25],
     preruncycles=10,
@@ -38,19 +38,19 @@ POP = optimisation(
 # run natural selection #
 #########################
 
-POP.optimise()
-POP.download()
-POP.evaluate()
+population.optimise()
+population.download()
+population.evaluate()
 
 ################
 # step by step #
 ################
 
-POP.add_new_designs()
-POP.to_next_generation(seed=1)
-POP.to_next_generation(seed=1001)
+population.add_new_designs()
+population.to_next_generation(seed=1)
+population.to_next_generation(seed=1001)
 
 #################
 # export report #
 #################
-report.make_report(POP, output_dir / "test.pdf")
+report.make_report(population, output_dir / "test.pdf")

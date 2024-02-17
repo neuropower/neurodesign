@@ -75,7 +75,7 @@ print(
     % (round(sum(iti) / len(iti), 2), round(min(iti), 2), round(max(iti), 2))
 )
 
-POP = neurodesign.optimisation(
+population = neurodesign.optimisation(
     experiment=exp,
     weights=[0, 0.5, 0.25, 0.25],
     preruncycles=10,
@@ -83,4 +83,4 @@ POP = neurodesign.optimisation(
     folder="./",
     seed=100,
 )
-POP.optimise()
+population.optimise()

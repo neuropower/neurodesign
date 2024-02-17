@@ -3,7 +3,7 @@ from neurodesign import generate
 
 # define experimental setup
 
-exp = neurodesign.experiment(
+exp = neurodesign.Experiment(
     TR=2,
     n_trials=20,
     P=[0.3, 0.3, 0.4],
@@ -21,7 +21,7 @@ exp = neurodesign.experiment(
 
 # define first design with a fixed ITI
 
-design_1 = neurodesign.design(
+design_1 = neurodesign.Design(
     order=[0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1],
     ITI=[2] * 20,
     experiment=exp,
@@ -38,7 +38,7 @@ design_1.FeCalc()
 
 # define second design
 
-design_2 = neurodesign.design(
+design_2 = neurodesign.Design(
     order=[0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 1],
     ITI=generate.iti(20, "exponential", min=1, mean=2, max=4, seed=1234)[0],
     experiment=exp,
@@ -53,13 +53,15 @@ design_2.FfCalc()
 # crossover to obtain design 3 and 4
 
 design_3, design_4 = design_1.crossover(design_2, seed=2000)
+
 design_3.order
-design_4.order
 design_3.designmatrix()
 design_3.FeCalc()
 design_3.FdCalc()
 design_3.FcCalc()
 design_3.FfCalc()
+
+design_4.order
 design_4.designmatrix()
 design_4.FeCalc()
 design_4.FdCalc()
@@ -67,21 +69,22 @@ design_4.FcCalc()
 design_4.FfCalc()
 
 # mutate design
-DES5 = design_1.mutation(0.3, seed=2000)
-DES5.designmatrix()
-DES5.FeCalc()
-DES5.FdCalc()
-DES5.FcCalc()
-DES5.FfCalc()
+design_5 = design_1.mutation(0.3, seed=2000)
+design_5.designmatrix()
+design_5.FeCalc()
+design_5.FdCalc()
+design_5.FcCalc()
+design_5.FfCalc()
 
 # compare detection power
 result = (
-    f" RESULTS \n ======= \n"
+    "RESULTS \n"
+    "======= \n"
     f"DESIGN 1: Fd = {design_1.Fd} \n"
     f"DESIGN 2: Fd = {design_2.Fd} \n"
     f"DESIGN 3: Fd = {design_3.Fd} \n"
     f"DESIGN 4: Fd = {design_4.Fd} \n"
-    f"DESIGN 5: Fd = {DES5.Fd} \n"
+    f"DESIGN 5: Fd = {design_5.Fd} \n"
 )
 
 print(result)

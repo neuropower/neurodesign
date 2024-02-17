@@ -1,11 +1,11 @@
 from pathlib import Path
 
-from neurodesign import experiment, optimisation, report
+from neurodesign import Experiment, Optimisation, report
 
 output_dir = Path(__file__).parent / "output"
 output_dir.mkdir(parents=True, exist_ok=True)
 
-exp = experiment(
+exp = Experiment(
     TR=2,
     n_trials=100,
     P=[0.33, 0.33, 0.33],
@@ -24,7 +24,7 @@ exp = experiment(
     ITImax=4,
 )
 
-population = optimisation(
+population = Optimisation(
     experiment=exp,
     weights=[0, 0.5, 0.25, 0.25],
     preruncycles=10,

@@ -1,9 +1,9 @@
-from neurodesign import optimisation, report
+from neurodesign import Optimisation, report
 
 
 def test_report_smoke(exp, tmp_path):
 
-    pop = optimisation(
+    pop = Optimisation(
         experiment=exp,
         weights=[0, 0.5, 0.25, 0.25],
         preruncycles=2,

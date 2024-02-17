@@ -20,7 +20,7 @@ from scipy.special import gamma
 from neurodesign import generate, report
 
 
-class design:
+class Design:
     """
     This class represents an experimental design for an fMRI experiment.
 
@@ -98,10 +98,10 @@ class design:
         offspringorder1 = list(self.order)[:changepoint] + list(other.order)[changepoint:]
         offspringorder2 = list(other.order)[:changepoint] + list(self.order)[changepoint:]
 
-        offspring1 = design(
+        offspring1 = Design(
             order=offspringorder1, ITI=self.ITI, experiment=self.experiment
         )
-        offspring2 = design(
+        offspring2 = Design(
             order=offspringorder2, ITI=other.ITI, experiment=self.experiment
         )
 
@@ -126,7 +126,7 @@ class design:
             mut_stim = np.random.choice(self.experiment.n_stimuli, 1, replace=True)[0]
             mutated[mut] = mut_stim
 
-        offspring = design(order=mutated, ITI=self.ITI, experiment=self.experiment)
+        offspring = Design(order=mutated, ITI=self.ITI, experiment=self.experiment)
 
         return offspring
 
@@ -328,7 +328,7 @@ class design:
         return self
 
 
-class experiment:
+class Experiment:
     """
     This class represents an fMRI experiment.
 
@@ -470,7 +470,7 @@ class experiment:
 
     def max_eff(self):
         """Compute maximum efficiency for Confounding and Frequency efficiency."""
-        NulDesign = design(
+        NulDesign = Design(
             order=[np.argmin(self.P)] * self.n_trials,
             ITI=[0] + [self.ITImean] * (self.n_trials - 1),
             experiment=self,
@@ -621,7 +621,7 @@ class experiment:
         return np.exp(res)
 
 
-class optimisation:
+class Optimisation:
     """Represent the population of experimental designs for fMRI.
 
     :param experiment: The experimental setup of the fMRI experiment.
@@ -715,9 +715,10 @@ class optimisation:
         Function will check design against strict options and develop the design if valid.
 
         :param design: Design to be added to population.
-        :type design: design object
+        :type design:  esign object
+
         :param weights: weights for efficiency calculation.
-        :type weights: list of floats, summing to 1
+        :type  weights: list of floats, summing to 1
         """
         # weights
 
@@ -797,7 +798,7 @@ class optimisation:
             if ITIlam:
                 self.exp.ITIlam = ITIlam
 
-            des = design(order=order, ITI=ITI, experiment=self.exp)
+            des = Design(order=order, ITI=ITI, experiment=self.exp)
 
             fulldes = self.check_develop(des, weights)
             if fulldes is False:
@@ -962,7 +963,7 @@ class optimisation:
         self.change_seed()
 
         if self.bestdesign:
-            bestdes = design(
+            bestdes = Design(
                 order=self.bestdesign.order, ITI=self.bestdesign.ITI, experiment=self.exp
             )
             bestdes = self.check_develop(bestdes)

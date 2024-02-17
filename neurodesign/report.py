@@ -25,7 +25,7 @@ plt.switch_backend("agg")
 
 def make_report(POP, outfile="NeuroDesign.pdf"):
     """Create a report of a finished design optimisation."""
-    if not type(POP.cov) == np.ndarray:
+    if not isinstance(POP.cov, np.ndarray):
         POP.evaluate()
 
     styles = getSampleStyleSheet()

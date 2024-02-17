@@ -62,7 +62,7 @@ class design:
             repcheck = not "".join(str(e) for e in [stim] * maxrep) in "".join(
                 str(e) for e in self.order
             )
-            if repcheck == False:
+            if repcheck is False:
                 break
 
         return repcheck
@@ -238,7 +238,7 @@ class design:
         invM = np.array(invM)
         st1 = np.dot(self.CX, invM)
         CMC = np.dot(st1, t(self.CX))
-        if Aoptimality == True:
+        if Aoptimality is True:
             self.Fe = float(self.CX.shape[0] / np.matrix.trace(CMC))
         else:
             self.Fe = float(np.linalg.det(CMC) ** (-1 / len(self.C)))
@@ -262,7 +262,7 @@ class design:
 
         invM = np.array(invM)
         CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
-        if Aoptimality == True:
+        if Aoptimality is True:
             self.Fd = float(len(self.C) / np.matrix.trace(CMC))
         else:
             self.Fd = float(np.linalg.det(CMC) ** (-1 / len(self.C)))
@@ -724,11 +724,11 @@ class optimisation:
         """
         # weights
 
-        if weights == None:
+        if weights is None:
             weights = self.weights
 
         # check maxrep, hardprob, every stimulus at least once
-        if not self.exp.maxrep == None:
+        if self.exp.maxrep is not None:
             if not design.check_maxrep(self.exp.maxrep):
                 return False
         if self.exp.hardprob:
@@ -740,7 +740,7 @@ class optimisation:
         # develop
 
         out = design.designmatrix()
-        if out == False:
+        if out is False:
             return False
         design.FCalc(
             weights, confoundorder=self.exp.confoundorder, Aoptimality=self.Aoptimality
@@ -761,7 +761,7 @@ class optimisation:
         :type seed: integer or None
         """
         # weights
-        if weights == None:
+        if weights is None:
             weights = self.weights
 
         if not R:
@@ -807,7 +807,7 @@ class optimisation:
             des = design(order=order, ITI=ITI, experiment=self.exp)
 
             fulldes = self.check_develop(des, weights)
-            if fulldes == False:
+            if fulldes is False:
                 continue
             else:
                 self.designs.append(fulldes)
@@ -832,7 +832,7 @@ class optimisation:
                     ind = np.where(isone)
                     remove = ind[1][ind[0] == ind[0][0]]
                     self.designs = [
-                        des for ind, des in enumerate(self.designs) if not ind in remove
+                        des for ind, des in enumerate(self.designs) if ind not in remove
                     ]
                     rm = rm + len(remove)
 
@@ -867,7 +867,7 @@ class optimisation:
                 offspring = design.mutation(self.q, seed=seed)
                 offspring = self.check_develop(offspring, weights)
 
-            if offspring == False:
+            if offspring is False:
                 continue
             else:
                 self.designs[idx] = offspring
@@ -898,7 +898,7 @@ class optimisation:
             )
             for baby in [baby1, baby2]:
                 baby = self.check_develop(baby, weights)
-                if baby == False:
+                if baby is False:
                     continue
                 else:
                     self.designs.append(baby)
@@ -924,11 +924,11 @@ class optimisation:
         :param optimisation: The type of optimisation - 'GA' or 'simulation'
         :type optimisation: string
         """
-        if optimisation == None:
+        if optimisation is None:
             optimisation = self.optimisation
 
         # weights
-        if weights == None:
+        if weights is None:
             weights = self.weights
 
         self._clean_designs(weights, seed)
@@ -978,7 +978,7 @@ class optimisation:
                 order=self.bestdesign.order, ITI=self.bestdesign.ITI, experiment=self.exp
             )
             bestdes = self.check_develop(bestdes)
-            if not bestdes == False:
+            if bestdes is not False:
                 self.designs.append(bestdes)
             self.bestdesign = None
 
@@ -1062,7 +1062,7 @@ class optimisation:
         if not self.folder:
             raise ValueError("No folder defined to download output.")
         else:
-            if self.cov == None:
+            if self.cov is None:
                 self.evaluate()
 
             # empty folder

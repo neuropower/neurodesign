@@ -3,6 +3,8 @@
 Loosely translated from http://fmriserver.ucsd.edu/ttliu
 """
 
+from __future__ import annotations
+
 import math
 
 import numpy as np

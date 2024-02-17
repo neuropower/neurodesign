@@ -1,12 +1,12 @@
 import pytest
 
-from neurodesign import experiment
+from neurodesign import Experiment
 
 
 @pytest.fixture
 def exp():
-
-    return experiment(
+    """Return a generic experiment for testing."""
+    return Experiment(
         TR=2,
         n_trials=20,
         P=[0.3, 0.3, 0.4],

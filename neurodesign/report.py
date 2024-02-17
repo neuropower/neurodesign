@@ -1,5 +1,7 @@
-import os
+from __future__ import annotations
+
 import time
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,10 +25,10 @@ from reportlab.platypus import (
 plt.switch_backend("agg")
 
 
-def make_report(POP, outfile="NeuroDesign.pdf"):
+def make_report(population, outfile: str | Path = "NeuroDesign.pdf"):
     """Create a report of a finished design optimisation."""
-    if not type(POP.cov) == np.ndarray:
-        POP.evaluate()
+    if not isinstance(population.cov, np.ndarray):
+        population.evaluate()
 
     styles = getSampleStyleSheet()
 
@@ -39,58 +41,54 @@ def make_report(POP, outfile="NeuroDesign.pdf"):
         bottomMargin=18,
     )
 
-    Story = []
-    curpath = os.path.dirname(__file__)
-    logofile = os.path.join(curpath, "media", "NeuroDes.png")
+    story = []
+    logofile = Path(__file__).parent / "media" / "NeuroDes.png"
 
     im = Image(logofile, 1 * inch, 1.25 * inch)
-    Story.append(im)
-    Story.append(Spacer(1, 12))
+    story.append(im)
+    story.append(Spacer(1, 12))
 
     title = "NeuroDesign: optimalisation report"
-    Story.append(Paragraph(title, styles["title"]))
-    Story.append(Spacer(1, 12))
+    story.append(Paragraph(title, styles["title"]))
+    story.append(Spacer(1, 12))
 
     formatted_time = time.ctime()
-    ptext = "Document created: %s" % formatted_time
-    Story.append(Paragraph(ptext, styles["Normal"]))
-    Story.append(Spacer(1, 12))
+    ptext = f"Document created: {formatted_time}"
+    story.append(Paragraph(ptext, styles["Normal"]))
+    story.append(Spacer(1, 12))
 
-    Story.append(Paragraph("Correlation between designs", styles["Heading2"]))
-    Story.append(Spacer(1, 12))
+    story.append(Paragraph("Correlation between designs", styles["Heading2"]))
+    story.append(Spacer(1, 12))
 
-    corr = f"During the optimisation, the designs are mixed with each other to find better combinations.  As such, the designs can look very similar. Actually, the genetic algorithm uses natural selection as a basis, and as such, the designs can be clustered in families.  This is the covariance matrix between the final {POP.G} designs"
-    Story.append(Paragraph(corr, styles["Normal"]))
+    corr = f"""During the optimisation, the designs are mixed
+with each other to find better combinations.
+As such, the designs can look very similar.
+Actually, the genetic algorithm uses natural selection as a basis,
+and as such, the designs can be clustered in families.
+This is the covariance matrix between the final {population.G} designs"""
+    story.append(Paragraph(corr, styles["Normal"]))
 
-    """
-    fig = plt.figure(figsize=(6, 6))
-    plt.imshow(POP.cov,interpolation="nearest")
-    plt.colorbar()
-    imgdata = BytesIO()
-    fig.savefig(imgdata, format='pdf')
-    imgdata.seek(0)  # rewind the data
+    story.append(PageBreak())
 
-    reader = form_xo_reader
-    image = reader(imgdata)
-    img = PdfImage(image,width=300,height=250)
-    Story.append(img)
-    """
+    story.append(Paragraph("Selected designs", styles["Heading2"]))
+    story.append(Spacer(1, 12))
 
-    Story.append(PageBreak())
+    designs = f"""The following figure shows in the upper panel the optimisation score
+over the different generations.
+Below are the expected signals of the best designs from different families,
+more specific and in relation with the covariance matrix,
+designs {str(population.out)[1:-1]}.
+Next to each design is the covariance matrix between the regressors,
+and the diagonalmatrix with the eigenvalues of the design matrix."""
+    story.append(Paragraph(designs, styles["Normal"]))
 
-    Story.append(Paragraph("Selected designs", styles["Heading2"]))
-    Story.append(Spacer(1, 12))
-
-    designs = f"The following figure shows in the upper panel the optimisation score over the different generations.  Below are the expected signals of the best designs from different families, more specific and in relation with the covariance matrix, designs {str(POP.out)[1:-1]}.  Next to each design is the covariance matrix between the regressors, and the diagonalmatrix with the eigenvalues of the design matrix."
-    Story.append(Paragraph(designs, styles["Normal"]))
-
-    fig = plt.figure(figsize=(12, 18))
-    gs = gridspec.GridSpec(POP.outdes + 4, 5)
+    plt.figure(figsize=(12, 18))
+    gs = gridspec.GridSpec(population.outdes + 4, 5)
     plt.subplot(gs[:2, :])
-    plt.plot(POP.optima)
+    plt.plot(population.optima)
 
-    for des in range(POP.outdes):
-        design = POP.designs[POP.out[des]]
+    for des in range(population.outdes):
+        design = population.designs[population.out[des]]
         stdes = des + 2
         plt.subplot(gs[stdes, :3])
         plt.plot(design.Xconv, lw=2)
@@ -105,84 +103,77 @@ def make_report(POP, outfile="NeuroDesign.pdf"):
         plt.imshow(eigenv, interpolation="nearest", clim=(0, 1))
         plt.axis("off")
         plt.colorbar(ticks=[0, 1])
-    """
-    imgdata = BytesIO()
-    fig.savefig(imgdata, format='pdf')
-    imgdata.seek(0)  # rewind the data
 
-    reader = form_xo_reader
-    image = reader(imgdata)
-    img = PdfImage(image,width=500,height=600)
-    Story.append(img)
-    """
-
-    Story.append(PageBreak())
+    story.append(PageBreak())
 
     intro = "Experimental settings"
-    Story.append(Paragraph(intro, styles["Heading2"]))
-    Story.append(Spacer(1, 12))
+    story.append(Paragraph(intro, styles["Heading2"]))
+    story.append(Spacer(1, 12))
 
     exp = [
-        ["Repetition time (TR):", POP.exp.TR],
-        ["Number of trials:", POP.exp.n_trials],
-        ["Number of scans:", POP.exp.n_scans],
-        ["Number of different stimuli:", POP.exp.n_stimuli],
+        ["Repetition time (TR):", population.exp.TR],
+        ["Number of trials:", population.exp.n_trials],
+        ["Number of scans:", population.exp.n_scans],
+        ["Number of different stimuli:", population.exp.n_stimuli],
         [],
-        ["Stimulus probabilities:", Table([POP.exp.P], rowHeights=13)],
+        ["Stimulus probabilities:", Table([population.exp.P], rowHeights=13)],
         [],
-        ["Duration of stimulus (s)", POP.exp.stim_duration],
-        ["Seconds before stimulus (in trial):", POP.exp.t_pre],
-        ["Seconds after stimulus (in trial)", POP.exp.t_post],
-        ["Duration of trial (s):", POP.exp.trial_duration],
-        ["Total experiment duration(s):", POP.exp.duration],
+        ["Duration of stimulus (s)", population.exp.stim_duration],
+        ["Seconds before stimulus (in trial):", population.exp.t_pre],
+        ["Seconds after stimulus (in trial)", population.exp.t_post],
+        ["Duration of trial (s):", population.exp.trial_duration],
+        ["Total experiment duration(s):", population.exp.duration],
         [],
-        ["Number of stimuli between rest blocks", POP.exp.restnum],
-        ["Duration of rest blocks (s):", POP.exp.restdur],
-        [],
-        [],
+        ["Number of stimuli between rest blocks", population.exp.restnum],
+        ["Duration of rest blocks (s):", population.exp.restdur],
         [],
         [],
         [],
-        ["Contrasts:", Table(list(POP.exp.C), rowHeights=13)],
         [],
-        ["ITI model:", POP.exp.ITImodel],
-        ["minimum ITI:", POP.exp.ITImin],
-        ["mean ITI:", POP.exp.ITImean],
-        ["maximum ITI:", POP.exp.ITImax],
         [],
-        ["Hard probabilities: ", POP.exp.hardprob],
-        ["Maximum number of repeated stimuli:", POP.exp.maxrep],
-        ["Resolution of design:", POP.exp.resolution],
+        ["Contrasts:", Table(list(population.exp.C), rowHeights=13)],
         [],
-        ["Assumed autocorrelation:", POP.exp.rho],
+        ["ITI model:", population.exp.ITImodel],
+        ["minimum ITI:", population.exp.ITImin],
+        ["mean ITI:", population.exp.ITImean],
+        ["maximum ITI:", population.exp.ITImax],
+        [],
+        ["Hard probabilities: ", population.exp.hardprob],
+        ["Maximum number of repeated stimuli:", population.exp.maxrep],
+        ["Resolution of design:", population.exp.resolution],
+        [],
+        ["Assumed autocorrelation:", population.exp.rho],
     ]
 
-    Story.append(Table(exp, rowHeights=13))
+    story.append(Table(exp, rowHeights=13))
 
     optset = "Optimalisation settings"
-    Story.append(Paragraph(optset, styles["Heading2"]))
-    Story.append(Spacer(1, 12))
+    story.append(Paragraph(optset, styles["Heading2"]))
+    story.append(Spacer(1, 12))
 
     opt = [
-        ["Optimalisation weights (Fe,Fd,Fc,Ff):", Table([POP.weights], rowHeights=13)],
+        [
+            "Optimalisation weights (Fe,Fd,Fc,Ff):",
+            Table([population.weights], rowHeights=13),
+        ],
         [],
-        ["Aoptimality?", POP.Aoptimality],
-        ["Number of designs in each generation:", POP.G],
-        ["Number of immigrants in each generation:", POP.I],
-        ["Confounding order:", POP.exp.confoundorder],
-        ["Convergence criterion:", POP.convergence],
-        ["Number of precycles:", POP.preruncycles],
-        ["Number of cycles:", POP.cycles],
-        ["Percentage of mutations:", POP.q],
-        ["Seed:", POP.seed],
+        ["Aoptimality?", population.Aoptimality],
+        ["Number of designs in each generation:", population.G],
+        ["Number of immigrants in each generation:", population.I],
+        ["Confounding order:", population.exp.confoundorder],
+        ["Convergence criterion:", population.convergence],
+        ["Number of precycles:", population.preruncycles],
+        ["Number of cycles:", population.cycles],
+        ["Percentage of mutations:", population.q],
+        ["Seed:", population.seed],
     ]
 
-    Story.append(Table(opt, rowHeights=13))
+    story.append(Table(opt, rowHeights=13))
 
-    doc.build(Story)
+    doc.build(story)
 
 
-def form_xo_reader(imgdata):
+def _form_xo_reader(imgdata):
     (page,) = PdfReader(imgdata).pages
     return pagexobj(page)
 
@@ -204,7 +195,7 @@ class PdfImage(Flowable):
             elif a in ("RIGHT", TA_RIGHT):
                 x += _sW
             elif a not in ("LEFT", TA_LEFT):
-                raise ValueError("Bad hAlign value " + str(a))
+                raise ValueError(f"Bad hAlign value {str(a)}")
         canv.saveState()
         img = self.img_data
         if isinstance(img, PdfDict):

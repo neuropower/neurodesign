@@ -35,30 +35,31 @@ def order(
     :returns order: A list with the created order of stimuli
     """
     if ordertype not in ["random", "blocked", "msequence"]:
-        raise ValueError(ordertype + " not known.")
+        raise ValueError(f"{ordertype} not known.")
 
-    if ordertype == "random":
-        np.random.seed(seed)
-        mult = np.random.multinomial(1, probabilities, ntrials)
-        order = [x.tolist().index(1) for x in mult]
+    np.random.seed(seed)
 
-    elif ordertype == "blocked":
-        np.random.seed(seed)
+    if ordertype == "blocked":
         blocksize = float(np.random.choice(np.arange(1, 10), 1)[0])
         nblocks = int(np.ceil(ntrials / blocksize))
-        np.random.seed(seed)
-        mult = np.random.multinomial(1, probabilities, nblocks)
-        blockorder = [x.tolist().index(1) for x in mult]
+        blockorder = _generate_order_items(probabilities, nblocks)
         order = np.repeat(blockorder, blocksize)[:ntrials]
 
     elif ordertype == "msequence":
         order = msequence.Msequence()
         order.GenMseq(mLen=ntrials, stimtypeno=nstim, seed=seed)
-        np.random.seed(seed)
         id = np.random.randint(len(order.orders))
         order = order.orders[id]
 
+    elif ordertype == "random":
+        order = _generate_order_items(probabilities, ntrials)
     return order
+
+
+def _generate_order_items(probabilities, items):
+    mult = np.random.multinomial(1, probabilities, items)
+    result = [x.tolist().index(1) for x in mult]
+    return result
 
 
 def iti(
@@ -154,7 +155,8 @@ def _compute_lambda(lower, upper, mean):
     check = _rtexp(100000, opt.x[0], lower, upper, seed=1000)
     if not np.isclose(np.mean(check), mean, rtol=0.1):
         raise ValueError(
-            "Error when figuring out lambda for exponential distribution: can't compute lambda."
+            "Error when figuring out lambda for exponential distribution: "
+            "can't compute lambda."
         )
     else:
         return opt.x[0]

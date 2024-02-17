@@ -8,7 +8,7 @@ import neurodesign
 output_dir = Path(__file__).parent / "output"
 output_dir.mkdir(parents=True, exist_ok=True)
 
-exp = neurodesign.experiment(
+exp = neurodesign.Experiment(
     TR=1.2,
     n_trials=20,
     P=[0.3, 0.3, 0.4],
@@ -21,37 +21,32 @@ exp = neurodesign.experiment(
     ITImax=4,
 )
 
-design_1 = neurodesign.design(
+design_1 = neurodesign.Design(
     order=[0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1],
     ITI=[2] * 20,
     experiment=exp,
 )
-
 design_1.designmatrix()
-
 design_1.FCalc(weights=[0.25, 0.25, 0.25, 0.25])
 
-
 plt.plot(design_1.Xconv)
-
 plt.savefig(output_dir / "example_figure_1.pdf", format="pdf")
 
-design_2 = neurodesign.design(
+design_2 = neurodesign.Design(
     order=[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
     ITI=[2] * 20,
     experiment=exp,
 )
 design_2.designmatrix()
 design_2.FCalc(weights=[0.25, 0.25, 0.25, 0.25])
-print(f"Ff of Design 1: {str(design_1.Ff)}")
-print(f"Ff of Design 2: {str(design_2.Ff)}")
-print(f"Fd of Design 1: {str(design_1.Fd)}")
-print(f"Fd of Design 2: {str(design_2.Fd)}")
+print(f"Ff of design 1: {str(design_1.Ff)}")
+print(f"Ff of design 2: {str(design_2.Ff)}")
+print(f"Fd of design 1: {str(design_1.Fd)}")
+print(f"Fd of design 2: {str(design_2.Fd)}")
 
 design_3, design_4 = design_1.crossover(design_2, seed=2000)
 print(design_3.order)
 print(design_4.order)
-
 
 order = neurodesign.generate.order(
     nstim=4,
@@ -69,13 +64,12 @@ iti, lam = neurodesign.generate.iti(
 
 print(iti[:10])
 print(
-    "mean ITI: %s \n\
-      min ITI: %s \n\
-      max ITI: %s"
-    % (round(sum(iti) / len(iti), 2), round(min(iti), 2), round(max(iti), 2))
+    f"mean ITI: {round(sum(iti) / len(iti), 2)}\n"
+    f"min ITI: {round(min(iti), 2)}\n"
+    f"max ITI: {round(max(iti), 2)}\n"
 )
 
-POP = neurodesign.optimisation(
+population = neurodesign.Optimisation(
     experiment=exp,
     weights=[0, 0.5, 0.25, 0.25],
     preruncycles=10,
@@ -83,4 +77,4 @@ POP = neurodesign.optimisation(
     folder="./",
     seed=100,
 )
-POP.optimise()
+population.optimise()

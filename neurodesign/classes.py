@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import math
-import os
 import shutil
 import warnings
 import zipfile
@@ -21,7 +20,7 @@ from scipy.special import gamma
 from neurodesign import generate, report
 
 
-class design:
+class Design:
     """
     This class represents an experimental design for an fMRI experiment.
 
@@ -46,9 +45,9 @@ class design:
         self.experiment = experiment
 
         # assert whether design is valid
-        if not len(self.ITI) == experiment.n_trials:
+        if len(self.ITI) != experiment.n_trials:
             raise ValueError("length of design (ITI's) does not comply with experiment")
-        if not len(self.order) == experiment.n_trials:
+        if len(self.order) != experiment.n_trials:
             raise ValueError("length of design (orders) does not comply with experiment")
 
     def check_maxrep(self, maxrep):
@@ -59,29 +58,27 @@ class design:
         :returns repcheck: Boolean indicating maximum repeats are respected
         """
         for stim in range(self.experiment.n_stimuli):
-            repcheck = not "".join(str(e) for e in [stim] * maxrep) in "".join(
+            repcheck = "".join(str(e) for e in [stim] * maxrep) not in "".join(
                 str(e) for e in self.order
             )
-            if repcheck == False:
+            if not repcheck:
                 break
 
         return repcheck
 
     def check_hardprob(self):
-        """Check whether frequencies of stimuli are **exactly** the prespecified frequencies.
+        """Check whether frequencies of stimuli \
+           are **exactly** the prespecified frequencies.
 
         :returns probcheck: Boolean indicating probabilities are respected
         """
         obscnt = Counter(self.order).values()
         obsprob = np.round(obscnt / np.sum(obscnt), decimals=2)
-        if not len(self.experiment.P) == len(obsprob):
+        if len(self.experiment.P) != len(obsprob):
             return False
 
         close = np.isclose(np.array(self.experiment.P), np.array(obsprob), atol=0.001)
-        if not np.sum(close) == len(obsprob):
-            return False
-
-        return True
+        return np.sum(close) == len(obsprob)
 
     def crossover(self, other, seed=1234):
         """Crossover design with other design and create offspring.
@@ -101,10 +98,10 @@ class design:
         offspringorder1 = list(self.order)[:changepoint] + list(other.order)[changepoint:]
         offspringorder2 = list(other.order)[:changepoint] + list(self.order)[changepoint:]
 
-        offspring1 = design(
+        offspring1 = Design(
             order=offspringorder1, ITI=self.ITI, experiment=self.experiment
         )
-        offspring2 = design(
+        offspring2 = Design(
             order=offspringorder2, ITI=other.ITI, experiment=self.experiment
         )
 
@@ -129,7 +126,7 @@ class design:
             mut_stim = np.random.choice(self.experiment.n_stimuli, 1, replace=True)[0]
             mutated[mut] = mut_stim
 
-        offspring = design(order=mutated, ITI=self.ITI, experiment=self.experiment)
+        offspring = Design(order=mutated, ITI=self.ITI, experiment=self.experiment)
 
         return offspring
 
@@ -238,7 +235,7 @@ class design:
         invM = np.array(invM)
         st1 = np.dot(self.CX, invM)
         CMC = np.dot(st1, t(self.CX))
-        if Aoptimality == True:
+        if Aoptimality is True:
             self.Fe = float(self.CX.shape[0] / np.matrix.trace(CMC))
         else:
             self.Fe = float(np.linalg.det(CMC) ** (-1 / len(self.C)))
@@ -262,7 +259,7 @@ class design:
 
         invM = np.array(invM)
         CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
-        if Aoptimality == True:
+        if Aoptimality is True:
             self.Fd = float(len(self.C) / np.matrix.trace(CMC))
         else:
             self.Fd = float(np.linalg.det(CMC) ** (-1 / len(self.C)))
@@ -331,7 +328,7 @@ class design:
         return self
 
 
-class experiment:
+class Experiment:
     """
     This class represents an fMRI experiment.
 
@@ -462,8 +459,8 @@ class experiment:
         if not np.isclose(self.TR % self.resolution, 0):
             self.resolution = _find_new_resolution(self.TR, self.resolution)
             warnings.warn(
-                "Warning: the resolution is adjusted to be a multiple of the TR.  New resolution: %f"
-                % self.resolution
+                "the resolution is adjusted to be a multiple of the TR."
+                f"New resolution: {self.resolution}"
             )
 
         self.countstim()
@@ -473,7 +470,7 @@ class experiment:
 
     def max_eff(self):
         """Compute maximum efficiency for Confounding and Frequency efficiency."""
-        NulDesign = design(
+        NulDesign = Design(
             order=[np.argmin(self.P)] * self.n_trials,
             ITI=[0] + [self.ITImean] * (self.n_trials - 1),
             experiment=self,
@@ -492,24 +489,9 @@ class experiment:
 
         if self.ITImodel == "uniform":
             self.ITImean = (self.ITImax + self.ITImin) / 2
-        if self.duration:
-            if not self.restnum == 0:
-                # duration of block between rest
-                blockdurNR = self.restnum * (self.ITImean + self.trial_duration)
-                blockdurWR = blockdurNR + self.restdur  # duration of block including rest
-                # number of blocks
-                blocknum = np.floor(self.duration / blockdurWR)
-                n_trials = blocknum * self.restnum
 
-                remain = self.duration - (blocknum * blockdurWR)
-                if remain >= blockdurNR:
-                    n_trials = n_trials + self.restnum
-                else:
-                    extratrials = np.floor(remain / (self.ITImean + self.trial_duration))
-                    n_trials = n_trials + extratrials
-                self.n_trials = int(n_trials)
-            else:
-                self.n_trials = int(self.duration / (self.ITImean + self.trial_duration))
+        if self.duration:
+            self.n_trials = self._compute_n_trials()
         else:
             ITIdur = self.n_trials * self.ITImean
             TRIALdur = self.n_trials * self.trial_duration
@@ -519,6 +501,29 @@ class experiment:
                     np.floor(self.n_trials / self.restnum) * self.restdur
                 )
             self.duration = duration
+
+    def _compute_n_trials(self):
+        if self.restnum == 0:
+            return int(self.duration / (self.ITImean + self.trial_duration))
+
+        # duration of block between rest
+        blockdurNR = self.restnum * (self.ITImean + self.trial_duration)
+
+        # duration of block including rest
+        blockdurWR = blockdurNR + self.restdur
+
+        # number of blocks
+        blocknum = np.floor(self.duration / blockdurWR)
+        n_trials = blocknum * self.restnum
+
+        remain = self.duration - (blocknum * blockdurWR)
+        if remain >= blockdurNR:
+            n_trials = n_trials + self.restnum
+        else:
+            extratrials = np.floor(remain / (self.ITImean + self.trial_duration))
+            n_trials = n_trials + extratrials
+
+        return int(n_trials)
 
     def CreateTsComp(self):
         """Compute the number of scans and timpoints (in seconds and resolution units)."""
@@ -616,7 +621,7 @@ class experiment:
         return np.exp(res)
 
 
-class optimisation:
+class Optimisation:
     """Represent the population of experimental designs for fMRI.
 
     :param experiment: The experimental setup of the fMRI experiment.
@@ -671,7 +676,7 @@ class optimisation:
         seed: int | None = None,
         I: int = 4,
         G: int = 20,
-        R: list[float] = [0.4, 0.4, 0.2],
+        R: list[float] | None = None,
         q: float = 0.01,
         Aoptimality: bool = True,
         folder: str | Path | None = None,
@@ -682,7 +687,7 @@ class optimisation:
 
         self.exp = experiment
         self.G = G
-        self.R = R
+        self.R = [0.4, 0.4, 0.2] if R is None else R
         self.q = q
         self.weights = weights
         self.I = I
@@ -691,13 +696,9 @@ class optimisation:
         self.convergence = convergence
         self.Aoptimality = Aoptimality
         self.outdes = outdes
-        self.folder = folder
+        self.folder = Path(folder).absolute() if folder else None
         self.optimisation = optimisation
-        if seed:
-            self.seed = seed
-        else:
-            self.seed = np.random.randint(10000)
-
+        self.seed = seed or np.random.randint(10000)
         self.designs = []
         self.optima = []
         self.bestdesign = None
@@ -705,11 +706,7 @@ class optimisation:
 
     def change_seed(self):
         """Change the seed."""
-        if self.seed < 4 * 10**9:
-            self.seed = self.seed + 1000
-        else:
-            self.seed = 1
-
+        self.seed = self.seed + 1000 if self.seed < 4 * 10**9 else 1
         return self
 
     def check_develop(self, design, weights=None):
@@ -718,37 +715,33 @@ class optimisation:
         Function will check design against strict options and develop the design if valid.
 
         :param design: Design to be added to population.
-        :type design: design object
+        :type design:  esign object
+
         :param weights: weights for efficiency calculation.
-        :type weights: list of floats, summing to 1
+        :type  weights: list of floats, summing to 1
         """
         # weights
 
-        if weights == None:
+        if weights is None:
             weights = self.weights
 
         # check maxrep, hardprob, every stimulus at least once
-        if not self.exp.maxrep == None:
-            if not design.check_maxrep(self.exp.maxrep):
-                return False
-        if self.exp.hardprob:
-            if not design.check_hardprob():
-                return False
+        if self.exp.maxrep is not None and not design.check_maxrep(self.exp.maxrep):
+            return False
+        if self.exp.hardprob and not design.check_hardprob():
+            return False
         if len(np.unique(design.order)) < self.exp.n_stimuli:
             return False
 
         # develop
 
         out = design.designmatrix()
-        if out == False:
+        if out is False:
             return False
         design.FCalc(
             weights, confoundorder=self.exp.confoundorder, Aoptimality=self.Aoptimality
         )
-        if np.isnan(design.F):
-            return False
-
-        return design
+        return False if np.isnan(design.F) else design
 
     def add_new_designs(self, weights=None, R=None):
         """Generate the population.
@@ -761,15 +754,17 @@ class optimisation:
         :type seed: integer or None
         """
         # weights
-        if weights == None:
+        if weights is None:
             weights = self.weights
 
         if not R:
             R = np.round(np.array(self.R) * self.G).tolist()
 
         if self.exp.n_stimuli in [6, 10] and R[2] > 0:
-            print(
-                "warning: for this number of conditions/stimuli, there are no msequences possible.  Replaced by random designs."
+            warnings.warns(
+                "for this number of conditions/stimuli, "
+                "there are no msequences possible.\n"
+                "Replaced by random designs."
             )
             R[1] = R[1] + R[2]
             R[2] = 0
@@ -777,7 +772,6 @@ class optimisation:
         NDes = 0
         self.change_seed()
 
-        k = 0
         while NDes < np.sum(R):
             self.change_seed()
             ind = np.sum(NDes >= np.cumsum(R))
@@ -804,18 +798,17 @@ class optimisation:
             if ITIlam:
                 self.exp.ITIlam = ITIlam
 
-            des = design(order=order, ITI=ITI, experiment=self.exp)
+            des = Design(order=order, ITI=ITI, experiment=self.exp)
 
             fulldes = self.check_develop(des, weights)
-            if fulldes == False:
+            if fulldes is False:
                 continue
-            else:
-                self.designs.append(fulldes)
-                NDes = NDes + 1
+            self.designs.append(fulldes)
+            NDes += 1
 
         return self
 
-    def _clean_designs(self, weights, seed):
+    def _clean_designs(self, weights):
         n = 0
         rm = 0
         while n == 0:
@@ -832,7 +825,7 @@ class optimisation:
                     ind = np.where(isone)
                     remove = ind[1][ind[0] == ind[0][0]]
                     self.designs = [
-                        des for ind, des in enumerate(self.designs) if not ind in remove
+                        des for ind, des in enumerate(self.designs) if ind not in remove
                     ]
                     rm = rm + len(remove)
 
@@ -867,7 +860,7 @@ class optimisation:
                 offspring = design.mutation(self.q, seed=seed)
                 offspring = self.check_develop(offspring, weights)
 
-            if offspring == False:
+            if offspring is False:
                 continue
             else:
                 self.designs[idx] = offspring
@@ -876,11 +869,9 @@ class optimisation:
 
     def _crossover(self, weights, seed):
         # select designs with F>median(F):
-        efficiencies = [x.F for x in self.designs]
-        # crossind = [ind for ind,val in enumerate(efficiencies) if val >= np.median(efficiencies)]
         crossind = range(len(self.designs))
 
-        nparents = int(len(crossind))
+        nparents = len(crossind)
         npairs = int(nparents / 2.0)
 
         np.random.seed(seed)
@@ -898,11 +889,10 @@ class optimisation:
             )
             for baby in [baby1, baby2]:
                 baby = self.check_develop(baby, weights)
-                if baby == False:
+                if baby is False:
                     continue
-                else:
-                    self.designs.append(baby)
-                    count = count + 1
+                self.designs.append(baby)
+                count = count + 1
 
         return self
 
@@ -924,14 +914,14 @@ class optimisation:
         :param optimisation: The type of optimisation - 'GA' or 'simulation'
         :type optimisation: string
         """
-        if optimisation == None:
+        if optimisation is None:
             optimisation = self.optimisation
 
         # weights
-        if weights == None:
+        if weights is None:
             weights = self.weights
 
-        self._clean_designs(weights, seed)
+        self._clean_designs(weights)
 
         # remove duplicates and replace by random designs
         if optimisation == "GA":
@@ -956,13 +946,12 @@ class optimisation:
 
         # check convergence
         gen = len(self.optima)
-        if gen > 1000:
-            if self.optima[-1] > self.optima[gen - 1000]:
-                self.finished = True
+        if gen > 1000 and self.optima[-1] > self.optima[gen - 1000]:
+            self.finished = True
 
         # select best G
         cutoff = np.sort(efficiencies)[::-1][self.G]
-        self.designs = [des for ind, des in enumerate(self.designs) if des.F >= cutoff]
+        self.designs = [des for des in self.designs if des.F >= cutoff]
 
         return self
 
@@ -974,17 +963,17 @@ class optimisation:
         self.change_seed()
 
         if self.bestdesign:
-            bestdes = design(
+            bestdes = Design(
                 order=self.bestdesign.order, ITI=self.bestdesign.ITI, experiment=self.exp
             )
             bestdes = self.check_develop(bestdes)
-            if not bestdes == False:
+            if bestdes is not False:
                 self.designs.append(bestdes)
             self.bestdesign = None
 
         return self
 
-    def optimise(self, optimisation="GA"):
+    def optimise(self):
         """Run design optimization."""
         if self.exp.FcMax == 1 and self.exp.FfMax == 1:
             self.exp.max_eff()
@@ -995,7 +984,7 @@ class optimisation:
             self.add_new_designs(weights=[1, 0, 0, 0])
             # loop
             bar = progressbar.ProgressBar()
-            for generation in bar(range(self.preruncycles)):
+            for _ in bar(range(self.preruncycles)):
                 self.to_next_generation(seed=self.seed, weights=[1, 0, 0, 0])
                 if self.finished:
                     continue
@@ -1006,7 +995,7 @@ class optimisation:
             self.add_new_designs(weights=[0, 1, 0, 0])
             # loop
             bar = progressbar.ProgressBar()
-            for generation in bar(range(self.preruncycles)):
+            for _ in bar(range(self.preruncycles)):
                 self.to_next_generation(seed=self.seed, weights=[0, 1, 0, 0])
                 if self.finished:
                     continue
@@ -1017,7 +1006,7 @@ class optimisation:
         self.add_new_designs()
         # loop
         bar = progressbar.ProgressBar()
-        for generation in bar(range(self.cycles)):
+        for _ in bar(range(self.cycles)):
             self.to_next_generation(seed=self.seed)
             if self.finished:
                 continue
@@ -1027,7 +1016,6 @@ class optimisation:
     def evaluate(self):
         # select designs: best from k-means clusters
         shape = self.bestdesign.Xconv.shape
-        xdim = np.zeros(np.product(shape))
         des = np.zeros([np.product(shape), len(self.designs)])
         efficiencies = np.array([x.F for x in self.designs])
         for d in range(len(self.designs)):
@@ -1061,76 +1049,68 @@ class optimisation:
     def download(self):
         if not self.folder:
             raise ValueError("No folder defined to download output.")
+
+        if self.cov is None:
+            self.evaluate()
+
+        # empty folder
+        if self.folder.exists():
+            files = self.folder.glob("**/design_*")
+            for f in files:
+                shutil.rmtree(f)
         else:
-            if self.cov == None:
-                self.evaluate()
+            self.folder.mkdir(parents=True, exist_ok=True)
 
-            # empty folder
-            if os.path.exists(self.folder):
-                files = os.listdir(self.folder)
-                for f in files:
-                    if "design_" in f:
-                        shutil.rmtree(os.path.join(self.folder, f))
-            else:
-                os.mkdir(self.folder)
+        reportfile = "report.pdf"
+        report.make_report(self, self.folder / reportfile)
 
-            reportfile = "report.pdf"
-            report.make_report(self, os.path.join(self.folder, reportfile))
+        files = []
 
-            files = []
+        for des in range(self.outdes):
 
-            for des in range(self.outdes):
+            (self.folder / f"design_{str(des)}").mkdir(parents=True)
 
-                os.mkdir(os.path.join(self.folder, "design_" + str(des)))
+            design = self.designs[self.out[des]]
 
-                design = self.designs[self.out[des]]
+            for stim in range(self.exp.n_stimuli):
 
-                for stim in range(self.exp.n_stimuli):
+                onsetsfile = Path(f"design_{str(des)}") / f"stimulus_{str(stim)}.txt"
 
-                    onsetsfile = os.path.join(
-                        "design_" + str(des), "stimulus_" + str(stim) + ".txt"
-                    )
-
-                    onsubsets = [
-                        str(x)
-                        for x in np.array(design.onsets)[np.array(design.order) == stim]
-                    ]
-                    f = open(os.path.join(self.folder, onsetsfile), "w+")
+                onsubsets = [
+                    str(x)
+                    for x in np.array(design.onsets)[np.array(design.order) == stim]
+                ]
+                with open(self.folder / onsetsfile, "w+") as f:
                     for line in onsubsets:
                         f.write(line)
                         f.write("\n")
-                    f.close()
+                files.append(onsetsfile)
 
-                    files.append(onsetsfile)
+            itifile = Path(f"design_{str(des)}") / "ITIs.txt"
 
-                itifile = os.path.join("design_" + str(des), "ITIs.txt")
-
-                f = open(os.path.join(self.folder, itifile), "w+")
+            with open(self.folder / itifile, "w+") as f:
                 for line in design.ITI:
                     f.write(str(line))
                     f.write("\n")
-                f.close()
+            files.append(itifile)
 
-                files.append(itifile)
-            files.append(reportfile)
+        files.append(reportfile)
 
-            # zip up
-            zip_subdir = "OptimalDesign"
-            self.zip_filename = "%s.zip" % zip_subdir
-            self.file = BytesIO()
-            zf = zipfile.ZipFile(self.file, "w")
+        # zip up
+        zip_subdir = "OptimalDesign"
+        self.zip_filename = f"{zip_subdir}.zip"
+        self.file = BytesIO()
+        zf = zipfile.ZipFile(self.file, "w")
 
-            for fpath in files:
-                zf.write(
-                    os.path.join(self.folder, fpath), os.path.join(zip_subdir, fpath)
-                )
-            zf.close()
+        for fpath in files:
+            zf.write(self.folder / fpath, Path(zip_subdir) / fpath)
 
-            return self
+        zf.close()
+
+        return self
 
     @staticmethod
     def pearsonr(signals, nstim):
-        cor = []
         varcov = np.zeros([len(signals), len(signals)])
         for sig1 in range(len(signals)):
             for sig2 in range(sig1, len(signals)):
@@ -1140,10 +1120,6 @@ class optimisation:
                 varcov[sig1, sig2] = np.mean(cors)
                 varcov[sig2, sig1] = np.mean(cors)
         return varcov
-
-
-def _change_resolution(inputmatrix, start=1, goal=0.1):  # for example
-    newmat = inputmatrix / goal
 
 
 def _find_new_resolution(TR, res):

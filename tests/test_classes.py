@@ -1,46 +1,46 @@
 import pytest
 
-from neurodesign import design, optimisation
+from neurodesign import Design, Optimisation
 
 
 def test_design_smoke(exp):
 
-    des = design(
+    design = Design(
         order=[0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1],
         ITI=[2] * 20,
         experiment=exp,
     )
-    des.designmatrix()
-    des.FCalc(weights=[0, 0.5, 0.25, 0.25])
-    des.FdCalc()
-    des.FcCalc()
-    des.FfCalc()
-    des.FeCalc()
+    design.designmatrix()
+    design.FCalc(weights=[0, 0.5, 0.25, 0.25])
+    design.FdCalc()
+    design.FcCalc()
+    design.FfCalc()
+    design.FeCalc()
 
-    des.mutation(0.3, seed=2000)
+    design.mutation(0.3, seed=2000)
 
 
 def test_design_cross_over_smoke(exp):
 
-    des = design(
+    design = Design(
         order=[0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1],
         ITI=[2] * 20,
         experiment=exp,
     )
 
-    des2 = design(
+    design_2 = Design(
         order=[0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 1],
         ITI=[2] * 20,
         experiment=exp,
     )
 
-    des.crossover(des2, seed=2000)
+    design.crossover(design_2, seed=2000)
 
 
 @pytest.mark.parametrize("optimisation_type", ["GA", "simulation"])
 def test_optimisation(exp, optimisation_type):
 
-    pop = optimisation(
+    population = Optimisation(
         experiment=exp,
         weights=[0, 0.5, 0.25, 0.25],
         preruncycles=2,
@@ -49,6 +49,6 @@ def test_optimisation(exp, optimisation_type):
         seed=100,
         optimisation=optimisation_type,
     )
-    pop.optimise()
-    pop.download()
-    pop.evaluate()
+    population.optimise()
+    population.download()
+    population.evaluate()

@@ -5,7 +5,7 @@ from neurodesign import experiment
 
 @pytest.fixture
 def exp():
-
+    """Return a generic experiment for testing."""
     return experiment(
         TR=2,
         n_trials=20,

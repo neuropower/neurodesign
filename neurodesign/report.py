@@ -52,7 +52,7 @@ def make_report(POP, outfile="NeuroDesign.pdf"):
     Story.append(Spacer(1, 12))
 
     formatted_time = time.ctime()
-    ptext = "Document created: %s" % formatted_time
+    ptext = f"Document created: {formatted_time}"
     Story.append(Paragraph(ptext, styles["Normal"]))
     Story.append(Spacer(1, 12))
 
@@ -75,7 +75,7 @@ This is the covariance matrix between the final {POP.G} designs"""
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 
-    reader = form_xo_reader
+    reader = _form_xo_reader
     image = reader(imgdata)
     img = PdfImage(image,width=300,height=250)
     Story.append(img)
@@ -94,7 +94,7 @@ Next to each design is the covariance matrix between the regressors,
 and the diagonalmatrix with the eigenvalues of the design matrix."""
     Story.append(Paragraph(designs, styles["Normal"]))
 
-    fig = plt.figure(figsize=(12, 18))
+    plt.figure(figsize=(12, 18))
     gs = gridspec.GridSpec(POP.outdes + 4, 5)
     plt.subplot(gs[:2, :])
     plt.plot(POP.optima)
@@ -120,7 +120,7 @@ and the diagonalmatrix with the eigenvalues of the design matrix."""
     fig.savefig(imgdata, format='pdf')
     imgdata.seek(0)  # rewind the data
 
-    reader = form_xo_reader
+    reader = _form_xo_reader
     image = reader(imgdata)
     img = PdfImage(image,width=500,height=600)
     Story.append(img)
@@ -192,7 +192,7 @@ and the diagonalmatrix with the eigenvalues of the design matrix."""
     doc.build(Story)
 
 
-def form_xo_reader(imgdata):
+def _form_xo_reader(imgdata):
     (page,) = PdfReader(imgdata).pages
     return pagexobj(page)
 

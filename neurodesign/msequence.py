@@ -626,7 +626,7 @@ class Msequence:
                 ]
             )
         else:
-            print("qmult base %s not supported yet" % base)
+            print(f"qmult base {base} not supported yet")
 
         y = amult[a, b]
         return y

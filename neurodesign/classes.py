@@ -769,7 +769,7 @@ class optimisation:
             R = np.round(np.array(self.R) * self.G).tolist()
 
         if self.exp.n_stimuli in [6, 10] and R[2] > 0:
-            warning.warns(
+            warnings.warns(
                 "for this number of conditions/stimuli, "
                 "there are no msequences possible.\n"
                 "Replaced by random designs."
@@ -780,7 +780,6 @@ class optimisation:
         NDes = 0
         self.change_seed()
 
-        k = 0
         while NDes < np.sum(R):
             self.change_seed()
             ind = np.sum(NDes >= np.cumsum(R))
@@ -1028,7 +1027,6 @@ class optimisation:
     def evaluate(self):
         # select designs: best from k-means clusters
         shape = self.bestdesign.Xconv.shape
-        xdim = np.zeros(np.product(shape))
         des = np.zeros([np.product(shape), len(self.designs)])
         efficiencies = np.array([x.F for x in self.designs])
         for d in range(len(self.designs)):
@@ -1117,7 +1115,7 @@ class optimisation:
 
             # zip up
             zip_subdir = "OptimalDesign"
-            self.zip_filename = "%s.zip" % zip_subdir
+            self.zip_filename = f"{zip_subdir}.zip"
             self.file = BytesIO()
             zf = zipfile.ZipFile(self.file, "w")
 
@@ -1131,7 +1129,6 @@ class optimisation:
 
     @staticmethod
     def pearsonr(signals, nstim):
-        cor = []
         varcov = np.zeros([len(signals), len(signals)])
         for sig1 in range(len(signals)):
             for sig2 in range(sig1, len(signals)):
@@ -1141,10 +1138,6 @@ class optimisation:
                 varcov[sig1, sig2] = np.mean(cors)
                 varcov[sig2, sig1] = np.mean(cors)
         return varcov
-
-
-def _change_resolution(inputmatrix, start=1, goal=0.1):  # for example
-    newmat = inputmatrix / goal
 
 
 def _find_new_resolution(TR, res):

@@ -7,15 +7,13 @@ ignore =
 	D100,
 	D101,
 	D102,
-	D103,
-	D105,
 	D107,
 	E741,
 	F821,
-	F841,
-	FS002,
-	FS001,
 	W503
+per-file-ignores =
+    # - docstrings rules that should not be applied to tests
+	tests/*: D100, D101, D102, D103
 # for compatibility with black
 # https://black.readthedocs.io/en/stable/guides/using_black_with_other_tools.html#flake8
 extend-ignore = E203

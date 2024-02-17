@@ -59,7 +59,12 @@ def make_report(POP, outfile="NeuroDesign.pdf"):
     Story.append(Paragraph("Correlation between designs", styles["Heading2"]))
     Story.append(Spacer(1, 12))
 
-    corr = f"During the optimisation, the designs are mixed with each other to find better combinations.  As such, the designs can look very similar. Actually, the genetic algorithm uses natural selection as a basis, and as such, the designs can be clustered in families.  This is the covariance matrix between the final {POP.G} designs"
+    corr = f"""During the optimisation, the designs are mixed
+with each other to find better combinations.
+As such, the designs can look very similar.
+Actually, the genetic algorithm uses natural selection as a basis,
+and as such, the designs can be clustered in families.
+This is the covariance matrix between the final {POP.G} designs"""
     Story.append(Paragraph(corr, styles["Normal"]))
 
     """
@@ -81,7 +86,12 @@ def make_report(POP, outfile="NeuroDesign.pdf"):
     Story.append(Paragraph("Selected designs", styles["Heading2"]))
     Story.append(Spacer(1, 12))
 
-    designs = f"The following figure shows in the upper panel the optimisation score over the different generations.  Below are the expected signals of the best designs from different families, more specific and in relation with the covariance matrix, designs {str(POP.out)[1:-1]}.  Next to each design is the covariance matrix between the regressors, and the diagonalmatrix with the eigenvalues of the design matrix."
+    designs = f"""The following figure shows in the upper panel the optimisation score
+over the different generations.
+Below are the expected signals of the best designs from different families,
+more specific and in relation with the covariance matrix, designs {str(POP.out)[1:-1]}.
+Next to each design is the covariance matrix between the regressors,
+and the diagonalmatrix with the eigenvalues of the design matrix."""
     Story.append(Paragraph(designs, styles["Normal"]))
 
     fig = plt.figure(figsize=(12, 18))

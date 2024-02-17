@@ -3,8 +3,6 @@
 max-line-length = 90
 # For PEP8 error codes see
 # http://pep8.readthedocs.org/en/latest/intro.html#error-codes
-; per-file-ignores =
-	; **/__init__.py: D104
 ignore =
 	D100,
 	D101,
@@ -12,7 +10,6 @@ ignore =
 	D103,
 	D105,
 	D107,
-	E501,
 	E741,
 	F821,
 	F841,

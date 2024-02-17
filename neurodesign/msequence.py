@@ -16,12 +16,16 @@ class Msequence:
         self.tapsfnc()
 
     def GenMseq(self, mLen, stimtypeno, seed):
-        """Generate a random msequence given the length of the desired sequence and the number of different values.
+        """Generate a random msequence given the length of the desired sequence \
+           and the number of different values.
 
         :param stimtypeno: Number of different stimulus types
         :type stimtypeno: integer
-        :param mLen: The length of the requested msequence (**will be shorter than full msequence**)
+
+        :param mLen: The length of the requested msequence
+                     (**will be shorter than full msequence**)
         :type MLen: integer
+
         :param seed: Seed with which msequence is sampled.
         :type seed: integer
         """
@@ -32,7 +36,6 @@ class Msequence:
         baseVal = self.stimtypeno
 
         # initiate powerVal
-        minpow = math.log(mLen + 1, baseVal)
         pos = list(self.taps[baseVal].keys())
         orders = []
 
@@ -64,17 +67,28 @@ class Msequence:
         self.orders = orders
         return self
 
-    def Mseq(self, baseVal, powerVal, shift=None, whichSeq=None, userTaps=None):
+    def Mseq(
+        self,
+        baseVal: int,
+        powerVal: int,
+        shift: int | None = None,
+        whichSeq: int | None = None,
+        userTaps=None,
+    ):
         """Generate a specific msequence given the base and power values.
+
+        :param baseVal: The base value of the msequence (equivalent to number of stimuli)
+        :type baseVal: integer
 
         :param powerVal: The power of the msequence
         :type powerVal: integer
-        :param baseVal: The base value of the msequence (equivalent to number of stimuli)
-        :type baseVal: integer
+
         :param shift: Shift of the msequence
         :type shift: integer
+
         :param whichSeq: Index of the sequence desired in the taps file.
         :type whichSeq: integer
+
         :param userTaps: if user wants to specify own polynomial taps
         :type userTaps: list
         """
@@ -107,13 +121,13 @@ class Msequence:
                 weights = tap[int(whichSeq)]
             else:
                 print(
-                    "You want at least 2 different stimulus types right? Now you asked for %s"
-                    % baseVal
+                    "You want at least 2 different stimulus types right?\n"
+                    f"Now you asked for {baseVal}"
                 )
 
         # generate msequence
         for i in range(bitNum):
-            if baseVal == 4 or baseVal == 8 or baseVal == 9:
+            if baseVal in {4, 8, 9}:
                 tmp = 0
                 for ind in range(len(weights)):
                     tmp = self.qadd(
@@ -532,7 +546,7 @@ class Msequence:
     def qadd(a, b, base):
 
         if a >= base or b >= base:
-            print("qadd(a,b), a and b must be < %s" % (base))
+            print(f"qadd(a,b), a and b must be < {base}")
 
         if base == 4:
             amat = np.array(
@@ -571,7 +585,7 @@ class Msequence:
                 ]
             )
         else:
-            print("qadd base %s not supported yet" % base)
+            print(f"qadd base {base} not supported yet")
 
         y = amat[a, b]
         return y
@@ -580,7 +594,7 @@ class Msequence:
     def qmult(a, b, base):
 
         if a >= base or b >= base:
-            print("qadd(a,b), a and b must be < %s" % (base))
+            print(f"qadd(a,b), a and b must be < {base}")
 
         if base == 4:
             amult = np.array([[0, 0, 0, 0], [0, 1, 2, 3], [0, 2, 3, 1], [0, 3, 1, 2]])

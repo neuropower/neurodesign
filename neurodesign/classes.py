@@ -68,7 +68,8 @@ class design:
         return repcheck
 
     def check_hardprob(self):
-        """Check whether frequencies of stimuli are **exactly** the prespecified frequencies.
+        """Check whether frequencies of stimuli \
+           are **exactly** the prespecified frequencies.
 
         :returns probcheck: Boolean indicating probabilities are respected
         """
@@ -462,8 +463,8 @@ class experiment:
         if not np.isclose(self.TR % self.resolution, 0):
             self.resolution = _find_new_resolution(self.TR, self.resolution)
             warnings.warn(
-                "Warning: the resolution is adjusted to be a multiple of the TR.  New resolution: %f"
-                % self.resolution
+                "the resolution is adjusted to be a multiple of the TR."
+                f"New resolution: {self.resolution}"
             )
 
         self.countstim()
@@ -768,8 +769,10 @@ class optimisation:
             R = np.round(np.array(self.R) * self.G).tolist()
 
         if self.exp.n_stimuli in [6, 10] and R[2] > 0:
-            print(
-                "warning: for this number of conditions/stimuli, there are no msequences possible.  Replaced by random designs."
+            warning.warns(
+                "for this number of conditions/stimuli, "
+                "there are no msequences possible.\n"
+                "Replaced by random designs."
             )
             R[1] = R[1] + R[2]
             R[2] = 0
@@ -876,8 +879,6 @@ class optimisation:
 
     def _crossover(self, weights, seed):
         # select designs with F>median(F):
-        efficiencies = [x.F for x in self.designs]
-        # crossind = [ind for ind,val in enumerate(efficiencies) if val >= np.median(efficiencies)]
         crossind = range(len(self.designs))
 
         nparents = int(len(crossind))

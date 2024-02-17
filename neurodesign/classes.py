@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import math
-import os
 import shutil
 import warnings
 import zipfile
@@ -673,7 +672,7 @@ class optimisation:
         seed: int | None = None,
         I: int = 4,
         G: int = 20,
-        R: list[float] = [0.4, 0.4, 0.2],
+        R: list[float] | None = None,
         q: float = 0.01,
         Aoptimality: bool = True,
         folder: str | Path | None = None,
@@ -684,7 +683,7 @@ class optimisation:
 
         self.exp = experiment
         self.G = G
-        self.R = R
+        self.R = [0.4, 0.4, 0.2] if R is None else R
         self.q = q
         self.weights = weights
         self.I = I
@@ -693,7 +692,7 @@ class optimisation:
         self.convergence = convergence
         self.Aoptimality = Aoptimality
         self.outdes = outdes
-        self.folder = folder
+        self.folder = Path(folder).absolute()
         self.optimisation = optimisation
         self.seed = seed or np.random.randint(10000)
         self.designs = []
@@ -724,7 +723,7 @@ class optimisation:
         # check maxrep, hardprob, every stimulus at least once
         if self.exp.maxrep is not None and not design.check_maxrep(self.exp.maxrep):
             return False
-        if not design.check_hardprob() and self.exp.hardprob:
+        if self.exp.hardprob and not design.check_hardprob():
             return False
         if len(np.unique(design.order)) < self.exp.n_stimuli:
             return False
@@ -804,7 +803,7 @@ class optimisation:
 
         return self
 
-    def _clean_designs(self, weights, seed):
+    def _clean_designs(self, weights):
         n = 0
         rm = 0
         while n == 0:
@@ -917,7 +916,7 @@ class optimisation:
         if weights is None:
             weights = self.weights
 
-        self._clean_designs(weights, seed)
+        self._clean_designs(weights)
 
         # remove duplicates and replace by random designs
         if optimisation == "GA":
@@ -969,7 +968,7 @@ class optimisation:
 
         return self
 
-    def optimise(self, optimisation="GA"):
+    def optimise(self):
         """Run design optimization."""
         if self.exp.FcMax == 1 and self.exp.FfMax == 1:
             self.exp.max_eff()
@@ -1045,72 +1044,65 @@ class optimisation:
     def download(self):
         if not self.folder:
             raise ValueError("No folder defined to download output.")
+
+        if self.cov is None:
+            self.evaluate()
+
+        # empty folder
+        if self.folder.exists():
+            files = self.folder.glob("**/design_*")
+            for f in files:
+                shutil.rmtree(f)
         else:
-            if self.cov is None:
-                self.evaluate()
+            self.folder.mkdir(parents=True, exist_ok=True)
 
-            # empty folder
-            if os.path.exists(self.folder):
-                files = os.listdir(self.folder)
-                for f in files:
-                    if "design_" in f:
-                        shutil.rmtree(os.path.join(self.folder, f))
-            else:
-                os.mkdir(self.folder)
+        reportfile = "report.pdf"
+        report.make_report(self, self.folder / reportfile)
 
-            reportfile = "report.pdf"
-            report.make_report(self, os.path.join(self.folder, reportfile))
+        files = []
 
-            files = []
+        for des in range(self.outdes):
 
-            for des in range(self.outdes):
+            (self.folder / f"design_{str(des)}").mkdir(parents=True)
 
-                os.mkdir(os.path.join(self.folder, "design_" + str(des)))
+            design = self.designs[self.out[des]]
 
-                design = self.designs[self.out[des]]
+            for stim in range(self.exp.n_stimuli):
 
-                for stim in range(self.exp.n_stimuli):
+                onsetsfile = Path(f"design_{str(des)}") / f"stimulus_{str(stim)}.txt"
 
-                    onsetsfile = os.path.join(
-                        "design_" + str(des), "stimulus_" + str(stim) + ".txt"
-                    )
-
-                    onsubsets = [
-                        str(x)
-                        for x in np.array(design.onsets)[np.array(design.order) == stim]
-                    ]
-                    f = open(os.path.join(self.folder, onsetsfile), "w+")
+                onsubsets = [
+                    str(x)
+                    for x in np.array(design.onsets)[np.array(design.order) == stim]
+                ]
+                with open(self.folder / onsetsfile, "w+") as f:
                     for line in onsubsets:
                         f.write(line)
                         f.write("\n")
-                    f.close()
+                files.append(onsetsfile)
 
-                    files.append(onsetsfile)
+            itifile = Path(f"design_{str(des)}") / "ITIs.txt"
 
-                itifile = os.path.join("design_" + str(des), "ITIs.txt")
-
-                f = open(os.path.join(self.folder, itifile), "w+")
+            with open(self.folder / itifile, "w+") as f:
                 for line in design.ITI:
                     f.write(str(line))
                     f.write("\n")
-                f.close()
+            files.append(itifile)
 
-                files.append(itifile)
-            files.append(reportfile)
+        files.append(reportfile)
 
-            # zip up
-            zip_subdir = "OptimalDesign"
-            self.zip_filename = f"{zip_subdir}.zip"
-            self.file = BytesIO()
-            zf = zipfile.ZipFile(self.file, "w")
+        # zip up
+        zip_subdir = "OptimalDesign"
+        self.zip_filename = f"{zip_subdir}.zip"
+        self.file = BytesIO()
+        zf = zipfile.ZipFile(self.file, "w")
 
-            for fpath in files:
-                zf.write(
-                    os.path.join(self.folder, fpath), os.path.join(zip_subdir, fpath)
-                )
-            zf.close()
+        for fpath in files:
+            zf.write(self.folder / fpath, Path(zip_subdir) / fpath)
 
-            return self
+        zf.close()
+
+        return self
 
     @staticmethod
     def pearsonr(signals, nstim):

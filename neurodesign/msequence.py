@@ -59,7 +59,7 @@ class Msequence:
         if mLen > len(ms):
             rep = int(np.ceil(mLen / len(ms)))
             ms = np.tile(ms, rep)
-        if not mLen % len(ms) == 0:
+        if mLen % len(ms) != 0:
             ms = ms[:mLen]
         ms = [int(x) for x in ms]
         orders.append(ms)

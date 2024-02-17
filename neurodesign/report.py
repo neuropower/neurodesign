@@ -1,5 +1,5 @@
-import os
 import time
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +23,7 @@ from reportlab.platypus import (
 plt.switch_backend("agg")
 
 
-def make_report(POP, outfile="NeuroDesign.pdf"):
+def make_report(POP, outfile: str | Path = "NeuroDesign.pdf"):
     """Create a report of a finished design optimisation."""
     if not isinstance(POP.cov, np.ndarray):
         POP.evaluate()
@@ -40,8 +40,7 @@ def make_report(POP, outfile="NeuroDesign.pdf"):
     )
 
     Story = []
-    curpath = os.path.dirname(__file__)
-    logofile = os.path.join(curpath, "media", "NeuroDes.png")
+    logofile = Path(__file__).parent / "media" / "NeuroDes.png"
 
     im = Image(logofile, 1 * inch, 1.25 * inch)
     Story.append(im)
@@ -214,7 +213,7 @@ class PdfImage(Flowable):
             elif a in ("RIGHT", TA_RIGHT):
                 x += _sW
             elif a not in ("LEFT", TA_LEFT):
-                raise ValueError("Bad hAlign value " + str(a))
+                raise ValueError(f"Bad hAlign value {str(a)}")
         canv.saveState()
         img = self.img_data
         if isinstance(img, PdfDict):

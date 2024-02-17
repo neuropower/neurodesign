@@ -73,14 +73,6 @@ DES5.FcCalc()
 DES5.FfCalc()
 
 # compare detection power
-result = (
-    " RESULTS \n"
-    " ======= \n"
-    "DESIGN 1: Fd = {} \n"
-    "DESIGN 2: Fd = {} \n"
-    "DESIGN 3: Fd = {} \n"
-    "DESIGN 4: Fd = {} \n"
-    "DESIGN 5: Fd = {} \n".format(DES.Fd, DES2.Fd, DES3.Fd, DES4.Fd, DES5.Fd)
-)
+result = f" RESULTS \n ======= \nDESIGN 1: Fd = {DES.Fd} \nDESIGN 2: Fd = {DES2.Fd} \nDESIGN 3: Fd = {DES3.Fd} \nDESIGN 4: Fd = {DES4.Fd} \nDESIGN 5: Fd = {DES5.Fd} \n"
 
 print(result)

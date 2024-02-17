@@ -22,7 +22,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                example: [comparedesigns.py, comparison_neurodesign.py, JSS_example.py, optimisation.py]
+                example: [compare_designs.py, JSS_example.py, optimisation.py]
         steps:
         -   name: Checkout
             uses: actions/checkout@v4

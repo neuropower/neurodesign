@@ -1,6 +1,9 @@
-import os
+from pathlib import Path
 
 from neurodesign import experiment, optimisation, report
+
+output_dir = Path(__file__).parent / "output"
+output_dir.mkdir(parents=True, exist_ok=True)
 
 EXP = experiment(
     TR=2,
@@ -28,7 +31,7 @@ POP = optimisation(
     cycles=10,
     seed=1,
     outdes=5,
-    folder=os.getcwd(),
+    folder=output_dir,
 )
 
 #########################
@@ -50,4 +53,4 @@ POP.to_next_generation(seed=1001)
 #################
 # export report #
 #################
-report.make_report(POP, os.path.join(os.path.dirname(__file__), "test.pdf"))
+report.make_report(POP, output_dir / "test.pdf")

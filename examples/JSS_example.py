@@ -1,10 +1,12 @@
-import os
-import os.path as op
 from collections import Counter
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
 import neurodesign
+
+output_dir = Path(__file__).parent / "output"
+output_dir.mkdir(parents=True, exist_ok=True)
 
 EXP = neurodesign.experiment(
     TR=1.2,
@@ -30,21 +32,17 @@ DES1.FCalc(weights=[0.25, 0.25, 0.25, 0.25])
 
 plt.plot(DES1.Xconv)
 
-out_dir = "output"
-if not op.isdir(out_dir):
-    os.makedirs(out_dir)
-
-plt.savefig(op.join(out_dir, "example_figure_1.pdf"), format="pdf")
+plt.savefig(output_dir / "example_figure_1.pdf", format="pdf")
 
 DES2 = neurodesign.design(
     order=[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1], ITI=[2] * 20, experiment=EXP
 )
 DES2.designmatrix()
 DES2.FCalc(weights=[0.25, 0.25, 0.25, 0.25])
-print("Ff of Design 1: " + str(DES1.Ff))
-print("Ff of Design 2: " + str(DES2.Ff))
-print("Fd of Design 1: " + str(DES1.Fd))
-print("Fd of Design 2: " + str(DES2.Fd))
+print(f"Ff of Design 1: {str(DES1.Ff)}")
+print(f"Ff of Design 2: {str(DES2.Ff)}")
+print(f"Fd of Design 1: {str(DES1.Fd)}")
+print(f"Fd of Design 2: {str(DES2.Fd)}")
 
 DES3, DES4 = DES1.crossover(DES2, seed=2000)
 print(DES3.order)

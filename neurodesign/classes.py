@@ -567,33 +567,46 @@ class optimisation:
     """Represent the population of experimental designs for fMRI.
 
     :param experiment: The experimental setup of the fMRI experiment.
-    :type experiment: experiment
+    :type  experiment: experiment
+
     :param G: The size of the generation
-    :type G: integer
+    :type  G: integer
+
     :param R: with which rate are the orders generated from ['blocked','random','mseq']
-    :type R: list
+    :type  R: list
+
     :param q: percentage of mutations
-    :type q: float
+    :type  q: float
+
     :param weights: weights attached to Fe, Fd, Ff, Fc
-    :type weights: list
+    :type  weights: list
+
     :param I: number of immigrants
-    :type I: integer
+    :type  I: integer
+
     :param preruncycles: number of prerun cycles (to find maximum Fe and Fd)
-    :type preruncycles: integer
+    :type  preruncycles: integer
+
     :param cycles: number of cycles
-    :type cycles: integer
+    :type  cycles: integer
+
     :param seed: seed
-    :type seed: integer
+    :type  seed: integer
+
     :param Aoptimality: optimises A-optimality if true, else D-optimality
-    :type Aoptimality: boolean
+    :type  Aoptimality: boolean
+
     :param convergence: after how many stable iterations is there convergence
-    :type convergence: integer
+    :type  convergence: integer
+
     :param folder: folder to save output
-    :type folder: string
+    :type  folder: string
+
     :param outdes: number of designs to be saved
-    :type outdes: integer
+    :type  outdes: integer
+
     :param optimisation: The type of optimisation - 'GA' or 'random'
-    :type optimisation: string
+    :type  optimisation: string
     """
 
     def __init__(
@@ -845,8 +858,10 @@ class optimisation:
 
         :param weights: weights for efficiency calculation.
         :type weights: list of floats, summing to 1
+
         :param seed: The seed for random processes.
         :type seed: integer or None
+
         :param optimisation: The type of optimisation - 'GA' or 'simulation'
         :type optimisation: string
         """

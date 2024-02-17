@@ -53,11 +53,12 @@ doc = [
 test = [
     "coverage",
     "pytest>=6.0.0",
-    "pytest-cov"
+    "pytest-cov",
+    "nbmake"
 ]
 
 [tool.black]
-line-length = 100
+line-length = 90
 
 [tool.codespell]
 ignore-words = ".github/codespell_ignore_words.txt"
@@ -74,6 +75,13 @@ source = "vcs"
 
 [tool.isort]
 combine_as_imports = true
-line_length = 100
+line_length = 90
 profile = "black"
 skip_gitignore = true
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers --doctest-modules --showlocals -s -vv --durations=0"
+doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
+junit_family = "xunit2"
+minversion = "6.0"
+xfail_strict = true

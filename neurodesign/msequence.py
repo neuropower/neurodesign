@@ -117,7 +117,9 @@ class Msequence:
                 tmp = 0
                 for ind in range(len(weights)):
                     tmp = self.qadd(
-                        tmp, self.qmult(int(weights[ind]), int(register[ind]), baseVal), baseVal
+                        tmp,
+                        self.qmult(int(weights[ind]), int(register[ind]), baseVal),
+                        baseVal,
                     )
                 ms[i] = tmp
             else:

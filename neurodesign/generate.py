@@ -37,29 +37,27 @@ def order(
     if ordertype not in ["random", "blocked", "msequence"]:
         raise ValueError(f"{ordertype} not known.")
 
+    np.random.seed(seed)
+
     if ordertype == "blocked":
-        np.random.seed(seed)
         blocksize = float(np.random.choice(np.arange(1, 10), 1)[0])
         nblocks = int(np.ceil(ntrials / blocksize))
-        blockorder = _extracted_from_order_40(seed, probabilities, nblocks)
+        blockorder = _generate_order_items(probabilities, nblocks)
         order = np.repeat(blockorder, blocksize)[:ntrials]
 
     elif ordertype == "msequence":
         order = msequence.Msequence()
         order.GenMseq(mLen=ntrials, stimtypeno=nstim, seed=seed)
-        np.random.seed(seed)
         id = np.random.randint(len(order.orders))
         order = order.orders[id]
 
     elif ordertype == "random":
-        order = _extracted_from_order_40(seed, probabilities, ntrials)
+        order = _generate_order_items(probabilities, ntrials)
     return order
 
 
-# TODO Rename this here and in `order`
-def _extracted_from_order_40(seed, probabilities, arg2):
-    np.random.seed(seed)
-    mult = np.random.multinomial(1, probabilities, arg2)
+def _generate_order_items(probabilities, items):
+    mult = np.random.multinomial(1, probabilities, items)
     result = [x.tolist().index(1) for x in mult]
     return result
 

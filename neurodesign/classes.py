@@ -489,11 +489,9 @@ class experiment:
 
         if self.ITImodel == "uniform":
             self.ITImean = (self.ITImax + self.ITImin) / 2
+
         if self.duration:
-            if self.restnum != 0:
-                self._extracted_from_countstim_10()
-            else:
-                self.n_trials = int(self.duration / (self.ITImean + self.trial_duration))
+            self.n_trials = self._compute_n_trials()
         else:
             ITIdur = self.n_trials * self.ITImean
             TRIALdur = self.n_trials * self.trial_duration
@@ -504,11 +502,16 @@ class experiment:
                 )
             self.duration = duration
 
-    # TODO Rename this here and in `countstim`
-    def _extracted_from_countstim_10(self):
+    def _compute_n_trials(self):
+        if self.restnum == 0:
+            return int(self.duration / (self.ITImean + self.trial_duration))
+
         # duration of block between rest
         blockdurNR = self.restnum * (self.ITImean + self.trial_duration)
-        blockdurWR = blockdurNR + self.restdur  # duration of block including rest
+
+        # duration of block including rest
+        blockdurWR = blockdurNR + self.restdur
+
         # number of blocks
         blocknum = np.floor(self.duration / blockdurWR)
         n_trials = blocknum * self.restnum
@@ -519,7 +522,8 @@ class experiment:
         else:
             extratrials = np.floor(remain / (self.ITImean + self.trial_duration))
             n_trials = n_trials + extratrials
-        self.n_trials = int(n_trials)
+
+        return int(n_trials)
 
     def CreateTsComp(self):
         """Compute the number of scans and timpoints (in seconds and resolution units)."""

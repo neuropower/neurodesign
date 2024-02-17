@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import math
 import os
@@ -6,6 +8,7 @@ import warnings
 import zipfile
 from collections import Counter
 from io import BytesIO
+from pathlib import Path
 
 import numpy as np
 import progressbar
@@ -15,7 +18,7 @@ import sklearn.cluster
 from numpy import transpose as t
 from scipy.special import gamma
 
-from . import generate, report
+from neurodesign import generate, report
 
 
 class design:
@@ -98,8 +101,12 @@ class design:
         offspringorder1 = list(self.order)[:changepoint] + list(other.order)[changepoint:]
         offspringorder2 = list(other.order)[:changepoint] + list(self.order)[changepoint:]
 
-        offspring1 = design(order=offspringorder1, ITI=self.ITI, experiment=self.experiment)
-        offspring2 = design(order=offspringorder2, ITI=other.ITI, experiment=self.experiment)
+        offspring1 = design(
+            order=offspringorder1, ITI=self.ITI, experiment=self.experiment
+        )
+        offspring2 = design(
+            order=offspringorder2, ITI=other.ITI, experiment=self.experiment
+        )
 
         return [offspring1, offspring2]
 
@@ -113,7 +120,9 @@ class design:
         :returns mutated: Mutated design
         """
         np.random.seed(seed)
-        mut_ind = np.random.choice(len(self.order), int(len(self.order) * q), replace=False)
+        mut_ind = np.random.choice(
+            len(self.order), int(len(self.order) * q), replace=False
+        )
         mutated = copy.copy(self.order)
         for mut in mut_ind:
             np.random.seed(seed)
@@ -130,7 +139,9 @@ class design:
         if self.experiment.restnum > 0:
             orderli = list(self.order)
             ITIli = list(self.ITI)
-            for x in np.arange(0, self.experiment.n_trials, self.experiment.restnum)[1:][::-1]:
+            for x in np.arange(0, self.experiment.n_trials, self.experiment.restnum)[1:][
+                ::-1
+            ]:
                 orderli.insert(x, "R")
                 ITIli.insert(x, self.experiment.restdur)
             ITIli = [
@@ -164,7 +175,10 @@ class design:
 
         # deconvolved matrix in resolution units
         deconvM = np.zeros(
-            [self.experiment.n_tp, int(self.experiment.laghrf * self.experiment.n_stimuli)]
+            [
+                self.experiment.n_tp,
+                int(self.experiment.laghrf * self.experiment.n_stimuli),
+            ]
         )
         for stim in range(self.experiment.n_stimuli):
             for j in range(int(self.experiment.laghrf)):
@@ -262,12 +276,16 @@ class design:
         :param confoundorder: To what order should confounding be protected
         :type confoundorder: integer
         """
-        Q = np.zeros([self.experiment.n_stimuli, self.experiment.n_stimuli, confoundorder])
+        Q = np.zeros(
+            [self.experiment.n_stimuli, self.experiment.n_stimuli, confoundorder]
+        )
         for n in range(len(self.order)):
             for r in np.arange(1, confoundorder + 1):
                 if n > (r - 1):
                     Q[self.order[n], self.order[n - r], r - 1] += 1
-        Qexp = np.zeros([self.experiment.n_stimuli, self.experiment.n_stimuli, confoundorder])
+        Qexp = np.zeros(
+            [self.experiment.n_stimuli, self.experiment.n_stimuli, confoundorder]
+        )
         for si in range(self.experiment.n_stimuli):
             for sj in range(self.experiment.n_stimuli):
                 for r in np.arange(1, confoundorder + 1):
@@ -286,7 +304,10 @@ class design:
         trialcount = Counter(self.order)
         Pobs = [trialcount[x] for x in range(self.experiment.n_stimuli)]
         self.Ff = np.sum(
-            abs(np.array(Pobs) - np.array(self.experiment.n_trials * np.array(self.experiment.P)))
+            abs(
+                np.array(Pobs)
+                - np.array(self.experiment.n_trials * np.array(self.experiment.P))
+            )
         )
         self.Ff = 1 - self.Ff / self.experiment.FfMax
         return self
@@ -295,7 +316,8 @@ class design:
         """
         Compute weighted average of efficiencies.
 
-        :param weights: Weights given to each of the efficiency metrics in this order: Estimation, Detection, Frequencies, Confounders.
+        :param weights: Weights given to each of the efficiency metrics in this order:
+                        Estimation, Detection, Frequencies, Confounders.
         :type weights: list of floats
         """
         if weights[0] > 0:
@@ -314,56 +336,79 @@ class experiment:
     This class represents an fMRI experiment.
 
     :param TR: The repetition time.
-    :type TR: float
+    :type  TR: float
+
     :param P: The probabilities of each trialtype.
-    :type P: ndarray
+    :type  P: ndarray
+
     :param C: The contrast matrix.  Example: np.array([[1,-1,0],[0,1,-1]])
-    :type C: ndarray
+    :type  C: ndarray
+
     :param rho: AR(1) correlation coefficient
-    :type rho: float
+    :type  rho: float
+
     :param n_stimuli: The number of stimuli (or conditions) in the experiment.
-    :type n_stimuli: integer
-    :param n_trials: The number of trials in the experiment.  Either specify n_trials **or** duration.
-    :type n_trials: integer
-    :param duration: The total duration (seconds) of the experiment.  Either specify n_trials **or** duration.
-    :type duration: float
+    :type  n_stimuli: integer
+
+    :param n_trials: The number of trials in the experiment.
+                     Either specify n_trials **or** duration.
+    :type  n_trials: integer
+
+    :param duration: The total duration (seconds) of the experiment.
+                     Either specify n_trials **or** duration.
+    :type  duration: float
+
     :param resolution: the maximum resolution of design matrix
-    :type resolution: float
+    :type  resolution: float
+
     :param stim_duration: duration (seconds) of stimulus
-    :type stim_duration: float
-    :param t_pre: duration (seconds) of trial part before stimulus presentation (eg. fixation cross)
-    :type t_pre: float
+    :type  stim_duration: float
+
+    :param t_pre: duration (seconds) of trial part before stimulus presentation
+                  (eg. fixation cross)
+    :type  t_pre: float
+
     :param t_post: duration (seconds) of trial part after stimulus presentation
-    :type t_post: float
+    :type  t_post: float
+
     :param maxrep: maximum number of repetitions
-    :type maxrep: integer or None
+    :type  maxrep: integer or None
+
     :param hardprob: can the probabilities differ from the nominal value?
-    :type hardprob: boolean
+    :type  hardprob: boolean
+
     :param confoundorder: The order to which confounding is controlled.
-    :type confoundorder: integer
+    :type  confoundorder: integer
+
     :param restnum: Number of trials between restblocks
-    :type restnum: integer
+    :type  restnum: integer
+
     :param restdur: duration (seconds) of the rest blocks
-    :type restdur: float
-    :param ITImodel: Which model to sample from.  Possibilities: "fixed","uniform","exponential"
-    :type ITImodel: string
+    :type  restdur: float
+
+    :param ITImodel: Which model to sample from.
+                     Possibilities: "fixed","uniform","exponential"
+    :type  ITImodel: string
+
     :param ITImin: The minimum ITI (required with "uniform" or "exponential")
-    :type ITImin: float
+    :type  ITImin: float
+
     :param ITImean: The mean ITI (required with "fixed" or "exponential")
-    :type ITImean: float
+    :type  ITImean: float
+
     :param ITImax: The max ITI (required with "uniform" or "exponential")
-    :type ITImax: float
+    :type  ITImax: float
 
     """
 
     def __init__(
         self,
-        TR,
+        TR: float,
         P,
         C,
-        rho,
+        rho: float,
         stim_duration,
-        n_stimuli,
+        n_stimuli: int,
         ITImodel=None,
         ITImin=None,
         ITImax=None,
@@ -372,7 +417,7 @@ class experiment:
         restdur=0,
         t_pre=0,
         t_post=0,
-        n_trials=None,
+        n_trials: int | None = None,
         duration=None,
         resolution=0.1,
         FeMax=1,
@@ -470,7 +515,9 @@ class experiment:
             TRIALdur = self.n_trials * self.trial_duration
             duration = ITIdur + TRIALdur
             if self.restnum > 0:
-                duration = duration + (np.floor(self.n_trials / self.restnum) * self.restdur)
+                duration = duration + (
+                    np.floor(self.n_trials / self.restnum) * self.restdur
+                )
             self.duration = duration
 
     def CreateTsComp(self):
@@ -515,7 +562,11 @@ class experiment:
 
         self.white = (
             self.V2
-            - self.V2 * t(self.S) * np.linalg.pinv(self.S * self.V2 * t(self.S)) * self.S * self.V2
+            - self.V2
+            * t(self.S)
+            * np.linalg.pinv(self.S * self.V2 * t(self.S))
+            * self.S
+            * self.V2
         )
 
         return self
@@ -552,7 +603,9 @@ class experiment:
         tmpt = np.array(2.0 * s / float(len(s) - 1) - 1)
         S[1] = tmpt
         for k in np.arange(2, deg):
-            S[k] = ((2.0 * k - 1.0) / k) * tmpt * S[k - 1] - ((k - 1) / float(k)) * S[k - 2]
+            S[k] = ((2.0 * k - 1.0) / k) * tmpt * S[k - 1] - ((k - 1) / float(k)) * S[
+                k - 2
+            ]
         return S
 
     @staticmethod
@@ -605,26 +658,26 @@ class optimisation:
     :param outdes: number of designs to be saved
     :type  outdes: integer
 
-    :param optimisation: The type of optimisation - 'GA' or 'random'
+    :param optimisation: The type of optimisation - 'GA' or 'simulation'
     :type  optimisation: string
     """
 
     def __init__(
         self,
-        experiment,
-        weights,
-        preruncycles,
-        cycles,
-        seed=None,
-        I=4,
-        G=20,
-        R=[0.4, 0.4, 0.2],
-        q=0.01,
-        Aoptimality=True,
-        folder=None,
-        outdes=3,
-        convergence=1000,
-        optimisation="GA",
+        experiment: experiment,
+        weights: list[float],
+        preruncycles: int,
+        cycles: int,
+        seed: int | None = None,
+        I: int = 4,
+        G: int = 20,
+        R: list[float] = [0.4, 0.4, 0.2],
+        q: float = 0.01,
+        Aoptimality: bool = True,
+        folder: str | Path | None = None,
+        outdes: int = 3,
+        convergence: int = 1000,
+        optimisation: str = "GA",
     ):
 
         self.exp = experiment
@@ -689,7 +742,9 @@ class optimisation:
         out = design.designmatrix()
         if out == False:
             return False
-        design.FCalc(weights, confoundorder=self.exp.confoundorder, Aoptimality=self.Aoptimality)
+        design.FCalc(
+            weights, confoundorder=self.exp.confoundorder, Aoptimality=self.Aoptimality
+        )
         if np.isnan(design.F):
             return False
 
@@ -831,12 +886,16 @@ class optimisation:
         np.random.seed(seed)
         CouplingRnd = np.random.choice(nparents, size=(npairs * 2), replace=False)
         CouplingRnd = [crossind[x] for x in CouplingRnd]
-        CouplingRnd = [[CouplingRnd[i], CouplingRnd[i + 1]] for i in np.arange(0, npairs * 2, 2)]
+        CouplingRnd = [
+            [CouplingRnd[i], CouplingRnd[i + 1]] for i in np.arange(0, npairs * 2, 2)
+        ]
 
         count = 0
 
         for couple in CouplingRnd:
-            baby1, baby2 = self.designs[couple[0]].crossover(self.designs[couple[1]], seed=seed)
+            baby1, baby2 = self.designs[couple[0]].crossover(
+                self.designs[couple[1]], seed=seed
+            )
             for baby in [baby1, baby2]:
                 baby = self.check_develop(baby, weights)
                 if baby == False:
@@ -1033,7 +1092,8 @@ class optimisation:
                     )
 
                     onsubsets = [
-                        str(x) for x in np.array(design.onsets)[np.array(design.order) == stim]
+                        str(x)
+                        for x in np.array(design.onsets)[np.array(design.order) == stim]
                     ]
                     f = open(os.path.join(self.folder, onsetsfile), "w+")
                     for line in onsubsets:
@@ -1061,7 +1121,9 @@ class optimisation:
             zf = zipfile.ZipFile(self.file, "w")
 
             for fpath in files:
-                zf.write(os.path.join(self.folder, fpath), os.path.join(zip_subdir, fpath))
+                zf.write(
+                    os.path.join(self.folder, fpath), os.path.join(zip_subdir, fpath)
+                )
             zf.close()
 
             return self
@@ -1072,7 +1134,9 @@ class optimisation:
         varcov = np.zeros([len(signals), len(signals)])
         for sig1 in range(len(signals)):
             for sig2 in range(sig1, len(signals)):
-                cors = np.diag(np.corrcoef(t(signals[sig1]), t(signals[sig2]))[nstim:, :nstim])
+                cors = np.diag(
+                    np.corrcoef(t(signals[sig1]), t(signals[sig2]))[nstim:, :nstim]
+                )
                 varcov[sig1, sig2] = np.mean(cors)
                 varcov[sig2, sig1] = np.mean(cors)
         return varcov

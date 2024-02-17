@@ -31,7 +31,12 @@ def make_report(POP, outfile="NeuroDesign.pdf"):
     styles = getSampleStyleSheet()
 
     doc = SimpleDocTemplate(
-        outfile, pagesize=letter, rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=18
+        str(outfile),
+        pagesize=letter,
+        rightMargin=40,
+        leftMargin=40,
+        topMargin=40,
+        bottomMargin=18,
     )
 
     Story = []

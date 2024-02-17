@@ -58,7 +58,7 @@ test = [
 ]
 
 [tool.black]
-line-length = 100
+line-length = 90
 
 [tool.codespell]
 ignore-words = ".github/codespell_ignore_words.txt"
@@ -75,7 +75,7 @@ source = "vcs"
 
 [tool.isort]
 combine_as_imports = true
-line_length = 100
+line_length = 90
 profile = "black"
 skip_gitignore = true
 

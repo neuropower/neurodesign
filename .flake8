@@ -1,6 +1,6 @@
 [flake8]
 --select = A,B,C,D,E,F,W,C90,FS
-max-line-length = 100
+max-line-length = 90
 # For PEP8 error codes see
 # http://pep8.readthedocs.org/en/latest/intro.html#error-codes
 ; per-file-ignores =

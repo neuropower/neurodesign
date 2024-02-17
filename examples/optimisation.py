@@ -5,7 +5,7 @@ from neurodesign import experiment, optimisation, report
 output_dir = Path(__file__).parent / "output"
 output_dir.mkdir(parents=True, exist_ok=True)
 
-EXP = experiment(
+exp = experiment(
     TR=2,
     n_trials=100,
     P=[0.33, 0.33, 0.33],
@@ -25,7 +25,7 @@ EXP = experiment(
 )
 
 POP = optimisation(
-    experiment=EXP,
+    experiment=exp,
     weights=[0, 0.5, 0.25, 0.25],
     preruncycles=10,
     cycles=10,

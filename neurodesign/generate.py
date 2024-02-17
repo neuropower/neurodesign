@@ -1,23 +1,37 @@
+from __future__ import annotations
+
 import numpy as np
 import scipy
 import scipy.stats as stats
 
-from . import msequence
+from neurodesign import msequence
 
 
-def order(nstim, ntrials, probabilities, ordertype, seed=1234):
+def order(
+    nstim: int,
+    ntrials: int,
+    probabilities: list[float],
+    ordertype: str,
+    seed: int | None = 1234,
+):
     """Generate an order of stimuli.
 
     :param nstim: The number of different stimuli (or conditions)
-    :type nstim: integer
+    :type  nstim: integer
+
     :param ntrials: The total number of trials
-    :type ntrials: integer
+    :type  ntrials: integer
+
     :param probabilities: The probabilities of each stimulus
-    :type probabilities: list
-    :param ordertype: Which model to sample from.  Possibilities: "blocked", "random" or "msequence"
-    :type ordertype: string
+    :type  probabilities: list
+
+    :param ordertype: Which model to sample from.
+                      Possibilities: "blocked", "random" or "msequence"
+    :type  ordertype: string
+
     :param seed: The seed with which the change point will be sampled.
-    :type seed: integer or None
+    :type  seed: integer or None
+
     :returns order: A list with the created order of stimuli
     """
     if ordertype not in ["random", "blocked", "msequence"]:
@@ -47,23 +61,42 @@ def order(nstim, ntrials, probabilities, ordertype, seed=1234):
     return order
 
 
-def iti(ntrials, model, min=None, mean=None, max=None, lam=None, resolution=0.1, seed=1234):
+def iti(
+    ntrials: int,
+    model: str,
+    min: float = None,
+    mean: float = None,
+    max: float = None,
+    lam=None,
+    resolution: float = 0.1,
+    seed: int | None = 1234,
+):
     """Generate an order of stimuli.
 
     :param ntrials: The total number of trials
-    :type ntrials: integer
-    :param model: Which model to sample from.  Possibilities: "fixed","uniform","exponential"
-    :type model: string
+    :type  ntrials: integer
+
+    :param model: Which model to sample from.
+                  Possibilities: "fixed","uniform","exponential"
+    :type  model: string
+
     :param min: The minimum ITI (required with "uniform" or "exponential")
-    :type min: float
+    :type  min: float
+
     :param mean: The mean ITI (required with "fixed" or "exponential")
-    :type mean: float
+    :type  mean: float
+
     :param max: The max ITI (required with "uniform" or "exponential")
-    :type max: float
+    :type  max: float
+
+    :param lam: lambda
+
     :param resolution: The resolution of the design: for rounding the ITI's
-    :type resolution: float
+    :type  resolution: float
+
     :param seed: The seed with which the change point will be sampled.
-    :type seed: integer or None
+    :type  seed: integer or None
+
     :returns iti: A list with the created ITI's
     """
     if model == "fixed":
@@ -123,7 +156,6 @@ def _compute_lambda(lower, upper, mean):
         raise ValueError(
             "Error when figuring out lambda for exponential distribution: can't compute lambda."
         )
-        return o
     else:
         return opt.x[0]
 

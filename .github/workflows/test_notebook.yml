@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
     test_notebook:
-        name: run flake8
+        name: run notebooks
         runs-on: ubuntu-latest
         steps:
         -   name: Checkout

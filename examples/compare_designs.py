@@ -1,3 +1,5 @@
+from rich import print
+
 import neurodesign
 from neurodesign import generate
 

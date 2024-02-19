@@ -2,6 +2,7 @@ from collections import Counter
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from rich import print
 
 import neurodesign
 

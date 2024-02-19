@@ -8,6 +8,7 @@ from __future__ import annotations
 import math
 
 import numpy as np
+from rich import print
 
 
 class Msequence:
@@ -17,7 +18,7 @@ class Msequence:
         # read in taps file and count
         self.tapsfnc()
 
-    def GenMseq(self, mLen, stimtypeno, seed):
+    def GenMseq(self, mLen: int, stimtypeno: int, seed: int):
         """Generate a random msequence given the length of the desired sequence \
            and the number of different values.
 

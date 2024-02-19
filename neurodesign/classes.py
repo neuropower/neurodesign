@@ -10,14 +10,37 @@ from io import BytesIO
 from pathlib import Path
 
 import numpy as np
-import progressbar
 import scipy
 import scipy.linalg
 import sklearn.cluster
 from numpy import transpose as t
+from rich import print
+from rich.progress import (
+    BarColumn,
+    MofNCompleteColumn,
+    Progress,
+    SpinnerColumn,
+    TaskProgressColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 from scipy.special import gamma
 
 from neurodesign import generate, report
+
+
+def progress_bar(text: str, color: str = "green") -> Progress:
+    """Return a rich progress bar instance."""
+    return Progress(
+        TextColumn(f"[{color}]{text}"),
+        SpinnerColumn("dots"),
+        TimeElapsedColumn(),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TaskProgressColumn(),
+        TimeRemainingColumn(),
+    )
 
 
 class Design:
@@ -982,41 +1005,52 @@ class Optimisation:
             # add new designs
             self.clear()
             self.add_new_designs(weights=[1, 0, 0, 0])
-            # loop
-            bar = progressbar.ProgressBar()
-            for _ in bar(range(self.preruncycles)):
-                self.to_next_generation(seed=self.seed, weights=[1, 0, 0, 0])
-                if self.finished:
-                    continue
+            with progress_bar(text="Optimizing") as progress:
+                task = progress.add_task(
+                    description="optimize", total=len(range(self.preruncycles))
+                )
+                for _ in range(self.preruncycles):
+                    self.to_next_generation(seed=self.seed, weights=[1, 0, 0, 0])
+                    progress.update(task, advance=1)
+                    if self.finished:
+                        continue
             self.exp.FeMax = np.max(self.bestdesign.F)
 
         if self.exp.FdMax == 1 and self.weights[1] > 0:
             self.clear()
             self.add_new_designs(weights=[0, 1, 0, 0])
-            # loop
-            bar = progressbar.ProgressBar()
-            for _ in bar(range(self.preruncycles)):
-                self.to_next_generation(seed=self.seed, weights=[0, 1, 0, 0])
-                if self.finished:
-                    continue
+            with progress_bar(text="Optimizing") as progress:
+                task = progress.add_task(
+                    description="optimize", total=len(range(self.preruncycles))
+                )
+                for _ in range(self.preruncycles):
+                    self.to_next_generation(seed=self.seed, weights=[0, 1, 0, 0])
+                    progress.update(task, advance=1)
+                    if self.finished:
+                        continue
             self.exp.FdMax = np.max(self.bestdesign.F)
 
         # clear all attributes
         self.clear()
         self.add_new_designs()
+
         # loop
-        bar = progressbar.ProgressBar()
-        for _ in bar(range(self.cycles)):
-            self.to_next_generation(seed=self.seed)
-            if self.finished:
-                continue
+        with progress_bar(text="Optimizing") as progress:
+            task = progress.add_task(
+                description="optimize", total=len(range(self.cycles))
+            )
+            for _ in range(self.cycles):
+                self.to_next_generation(seed=self.seed)
+                progress.update(task, advance=1)
+                if self.finished:
+                    continue
 
         return self
 
     def evaluate(self):
         # select designs: best from k-means clusters
         shape = self.bestdesign.Xconv.shape
-        des = np.zeros([np.product(shape), len(self.designs)])
+        des = np.zeros([np.prod(shape), len(self.designs)])
         efficiencies = np.array([x.F for x in self.designs])
         for d in range(len(self.designs)):
             hrf = []

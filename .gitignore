@@ -1,7 +1,4 @@
-report.pdf
-examples/test.pdf
-output
-design_*
+examples/output
 
 # hatch handles this one
 neurodesign/_version.py

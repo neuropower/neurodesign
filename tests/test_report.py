@@ -8,7 +8,7 @@ def test_report_smoke(exp, tmp_path):
         weights=[0, 0.5, 0.25, 0.25],
         preruncycles=2,
         cycles=2,
-        folder="./",
+        folder=tmp_path,
         seed=100,
     )
     pop.optimise()

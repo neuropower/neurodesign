@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Code formatted with blac.
 * flake8 errors were fixed.
 * Packaging reorganized to use hatch and pyproject.toml.
+* Use rich for progress bar.
 
 ### Deprecated
 

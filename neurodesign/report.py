@@ -22,12 +22,10 @@ from reportlab.platypus import (
     Table,
 )
 
-from neurodesign import Optimisation
-
 plt.switch_backend("agg")
 
 
-def make_report(population: Optimisation, outfile: str | Path = "NeuroDesign.pdf"):
+def make_report(population, outfile: str | Path = "NeuroDesign.pdf"):
     """Create a report of a finished design optimisation."""
     if not isinstance(population.cov, np.ndarray):
         population.evaluate()

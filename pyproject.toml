@@ -23,7 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "scikit-learn>0.15.0",
-    "progressbar>2.0",
+    "rich",
     "reportlab",
     "pdfrw",
     "matplotlib"

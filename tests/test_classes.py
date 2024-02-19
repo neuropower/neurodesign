@@ -38,14 +38,14 @@ def test_design_cross_over_smoke(exp):
 
 
 @pytest.mark.parametrize("optimisation_type", ["GA", "simulation"])
-def test_optimisation(exp, optimisation_type):
+def test_optimisation(exp, optimisation_type, tmp_path):
 
     population = Optimisation(
         experiment=exp,
         weights=[0, 0.5, 0.25, 0.25],
         preruncycles=2,
         cycles=2,
-        folder="./",
+        folder=tmp_path,
         seed=100,
         optimisation=optimisation_type,
     )

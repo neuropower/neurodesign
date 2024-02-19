@@ -996,17 +996,6 @@ class Optimisation:
 
         return self
 
-    def _run_optimisation_loop(self, weights):
-        with progress_bar(text="Optimizing") as progress:
-            task = progress.add_task(
-                description="optimize", total=len(range(self.preruncycles))
-            )
-            for _ in range(self.preruncycles):
-                self.to_next_generation(seed=self.seed, weights=weights)
-                progress.update(task, advance=1)
-                if self.finished:
-                    continue
-
     def optimise(self):
         """Run design optimization."""
         if self.exp.FcMax == 1 and self.exp.FfMax == 1:
@@ -1016,13 +1005,29 @@ class Optimisation:
             # add new designs
             self.clear()
             self.add_new_designs(weights=[1, 0, 0, 0])
-            self._run_optimisation_loop(self, weights=[1, 0, 0, 0])
+            with progress_bar(text="Optimizing") as progress:
+                task = progress.add_task(
+                    description="optimize", total=len(range(self.preruncycles))
+                )
+                for _ in range(self.preruncycles):
+                    self.to_next_generation(seed=self.seed, weights=[1, 0, 0, 0])
+                    progress.update(task, advance=1)
+                    if self.finished:
+                        continue
             self.exp.FeMax = np.max(self.bestdesign.F)
 
         if self.exp.FdMax == 1 and self.weights[1] > 0:
             self.clear()
             self.add_new_designs(weights=[0, 1, 0, 0])
-            self._run_optimisation_loop(self, weights=[0, 1, 0, 0])
+            with progress_bar(text="Optimizing") as progress:
+                task = progress.add_task(
+                    description="optimize", total=len(range(self.preruncycles))
+                )
+                for _ in range(self.preruncycles):
+                    self.to_next_generation(seed=self.seed, weights=[0, 1, 0, 0])
+                    progress.update(task, advance=1)
+                    if self.finished:
+                        continue
             self.exp.FdMax = np.max(self.bestdesign.F)
 
         # clear all attributes

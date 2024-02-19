@@ -23,7 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* Automated tersting with tox, pytest and github actions.
+
 ### Changed
+
+* Classes Experiment, Design and Optimisation have been renamed (Capitalised).
+* Code formatted with blac.
+* flake8 errors were fixed.
+* Packaging reorganized to use hatch and pyproject.toml.
 
 ### Deprecated
 

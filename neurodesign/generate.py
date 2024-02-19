@@ -65,9 +65,9 @@ def _generate_order_items(probabilities, items):
 def iti(
     ntrials: int,
     model: str,
-    min: float = None,
-    mean: float = None,
-    max: float = None,
+    min: float | None = None,
+    mean: float | None = None,
+    max: float | None = None,
     lam=None,
     resolution: float = 0.1,
     seed: int | None = 1234,

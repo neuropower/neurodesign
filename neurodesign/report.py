@@ -22,10 +22,12 @@ from reportlab.platypus import (
     Table,
 )
 
+from neurodesign import Optimisation
+
 plt.switch_backend("agg")
 
 
-def make_report(population, outfile: str | Path = "NeuroDesign.pdf"):
+def make_report(population: Optimisation, outfile: str | Path = "NeuroDesign.pdf"):
     """Create a report of a finished design optimisation."""
     if not isinstance(population.cov, np.ndarray):
         population.evaluate()
@@ -179,15 +181,16 @@ def _form_xo_reader(imgdata):
 
 
 class PdfImage(Flowable):
-    def __init__(self, img_data, width=200, height=200):
+    def __init__(self, img_data, width: int = 200, height: int = 200):
         self.img_width = width
         self.img_height = height
         self.img_data = img_data
 
-    def wrap(self, width, height):
+    def wrap(self):
         return self.img_width, self.img_height
 
     def drawOn(self, canv, x, y, _sW=0):
+        # TODO TA_CENTER TA_RIGHT TA_LEFT are undefined
         if _sW > 0 and hasattr(self, "hAlign"):
             a = self.hAlign
             if a in ("CENTER", "CENTRE", TA_CENTER):

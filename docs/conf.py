@@ -12,7 +12,6 @@ serve to show the default.
 
 import os
 import sys
-from unittest import mock
 
 from neurodesign._version import __version__
 
@@ -248,41 +247,6 @@ texinfo_documents = [
         "Miscellaneous",
     ),
 ]
-
-
-MOCK_MODULES = [
-    "numpy",
-    "scipy",
-    "matplotlib",
-    "matplotlib.pyplot",
-    "matplotlib.gridspec",
-    "scipy.interpolate",
-    "scipy.special",
-    "numpy.linalg",
-    "scipy.stats",
-    "seaborn",
-    "neurodesign",
-    "pandas",
-    "scipy.linalg",
-    "scipy.sparse",
-    "sklearn",
-    "sklearn.cluster",
-    "pdfrw",
-    "pdfrw.buildxobj",
-    "pdfrw.toreportlab",
-    "reportlab",
-    "reportlab.lib",
-    "reportlab.lib.pagesizes",
-    "reportlab.lib.styles",
-    "reportlab.lib.units",
-    "reportlab.lib.utils",
-    "reportlab.platypus",
-    "progressbar",
-]
-
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
-
 
 # Documents to append as an appendix to all manuals.
 # texinfo_appendices = []

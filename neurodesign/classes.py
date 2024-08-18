@@ -773,7 +773,7 @@ class Optimisation:
         :type experiment: experiment
         :param weights: weights for efficiency calculation.
         :type weights: list of floats, summing to 1
-        :param seed: The seed for ramdom processes.
+        :param seed: The seed for random processes.
         :type seed: integer or None
         """
         # weights

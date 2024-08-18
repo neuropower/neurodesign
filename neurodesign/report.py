@@ -26,7 +26,6 @@ from reportlab.platypus import (
 
 def make_report(population, outfile: str | Path = "NeuroDesign.pdf"):
     """Create a report of a finished design optimisation."""
-
     backend = matplotlib.get_backend()
     plt.switch_backend("agg")
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import time
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import gridspec
@@ -22,11 +23,13 @@ from reportlab.platypus import (
     Table,
 )
 
-plt.switch_backend("agg")
-
 
 def make_report(population, outfile: str | Path = "NeuroDesign.pdf"):
     """Create a report of a finished design optimisation."""
+
+    backend = matplotlib.get_backend()
+    plt.switch_backend("agg")
+
     if not isinstance(population.cov, np.ndarray):
         population.evaluate()
 
@@ -171,6 +174,8 @@ and the diagonalmatrix with the eigenvalues of the design matrix."""
     story.append(Table(opt, rowHeights=13))
 
     doc.build(story)
+
+    plt.switch_backend(backend)
 
 
 def _form_xo_reader(imgdata):

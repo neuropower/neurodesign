@@ -482,7 +482,7 @@ class Experiment:
         if not np.isclose(self.TR % self.resolution, 0):
             self.resolution = _find_new_resolution(self.TR, self.resolution)
             warnings.warn(
-                "the resolution is adjusted to be a multiple of the TR."
+                "the resolution is adjusted to be a multiple of the TR. "
                 f"New resolution: {self.resolution}"
             )
 

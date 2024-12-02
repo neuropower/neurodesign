@@ -35,7 +35,7 @@ jobs:
         -   name: Run tests
             run: tox run -e tests
         -   name: Upload coverage to CodeCov
-            uses: codecov/codecov-action@v4
+            uses: codecov/codecov-action@v5
             with:
                 flags: ${{ matrix.os }}_${{ matrix.py }}
             if: success()

@@ -163,8 +163,9 @@ def _compute_lambda(lower, upper, mean):
 
 
 def _difexp(lam, lower, upper, mean):
+    lam = float(np.asarray(lam).item())
     diff = stats.truncexpon(
-        (float(upper) - float(lower)) / float(lam), loc=float(lower), scale=float(lam)
+        (float(upper) - float(lower)) / lam, loc=float(lower), scale=lam
     ).mean() - float(mean)
     return abs(diff)
 

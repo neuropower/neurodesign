@@ -283,7 +283,7 @@ class Design:
         invM = np.array(invM)
         CMC = np.matrix(self.C) * invM * np.matrix(t(self.C))
         if Aoptimality is True:
-            self.Fd = float(len(self.C) / np.matrix.trace(CMC))
+            self.Fd = float(len(self.C) / np.trace(np.asarray(CMC)))
         else:
             self.Fd = float(np.linalg.det(CMC) ** (-1 / len(self.C)))
         self.Fd = self.Fd / self.experiment.FdMax
